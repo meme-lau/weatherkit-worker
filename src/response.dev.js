@@ -113,6 +113,13 @@ Console.info(`FORMAT: ${FORMAT}`);
                                 await Promise.all(
                                     parameters.dataSets.map(async dataSet => {
                                         switch (dataSet) {
+                                            case "airQuality": {
+                                                if (Settings?.LogLevel === "DEBUG" || Settings?.LogLevel === "ALL") {
+                                                    matchEnum.airQuality();
+                                                }
+                                                body.airQuality = await InjectAirQuality(body.airQuality, Settings, Caches, enviroments);
+                                                break;
+                                            }
                                             case "currentWeather": {
                                                 if (Settings?.LogLevel === "DEBUG" || Settings?.LogLevel === "ALL") {
                                                     matchEnum.weatherCondition();
@@ -140,13 +147,6 @@ Console.info(`FORMAT: ${FORMAT}`);
                                                 }
                                                 body.forecastNextHour = await InjectForecastNextHour(body.forecastNextHour, Settings, enviroments);
                                                 if (body?.forecastNextHour?.metadata?.providerName && !body?.forecastNextHour?.metadata?.providerLogo) body.forecastNextHour.metadata.providerLogo = providerNameToLogo(body?.forecastNextHour?.metadata?.providerName, "v2");
-                                                break;
-                                            }
-                                            case "airQuality": {
-                                                if (Settings?.LogLevel === "DEBUG" || Settings?.LogLevel === "ALL") {
-                                                    matchEnum.airQuality();
-                                                }
-                                                body.airQuality = await InjectAirQuality(body.airQuality, Settings, Caches, enviroments);
                                                 break;
                                             }
                                             case "weatherAlerts": {

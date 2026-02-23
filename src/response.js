@@ -95,6 +95,10 @@ Console.info(`FORMAT: ${FORMAT}`);
                                 await Promise.all(
                                     parameters.dataSets.map(async dataSet => {
                                         switch (dataSet) {
+                                            case "airQuality": {
+                                                body.airQuality = await InjectAirQuality(body.airQuality, Settings, Caches, enviroments);
+                                                break;
+                                            }
                                             case "currentWeather": {
                                                 body.currentWeather = await InjectCurrentWeather(body.currentWeather, Settings, enviroments);
                                                 if (body?.currentWeather?.metadata?.providerName && !body?.currentWeather?.metadata?.providerLogo) body.currentWeather.metadata.providerLogo = providerNameToLogo(body?.currentWeather?.metadata?.providerName, "v2");
@@ -113,10 +117,6 @@ Console.info(`FORMAT: ${FORMAT}`);
                                             case "forecastNextHour": {
                                                 body.forecastNextHour = await InjectForecastNextHour(body.forecastNextHour, Settings, enviroments);
                                                 if (body?.forecastNextHour?.metadata?.providerName && !body?.forecastNextHour?.metadata?.providerLogo) body.forecastNextHour.metadata.providerLogo = providerNameToLogo(body?.forecastNextHour?.metadata?.providerName, "v2");
-                                                break;
-                                            }
-                                            case "airQuality": {
-                                                body.airQuality = await InjectAirQuality(body.airQuality, Settings, Caches, enviroments);
                                                 break;
                                             }
                                             default:
