@@ -5,11 +5,11 @@ export default {
             Weather: { Replace: ["CN"], Provider: "ColorfulClouds" },
             NextHour: { Provider: "ColorfulClouds" },
             AirQuality: {
-                Current: { Pollutants: { Provider: "ColorfulClouds", Units: { Replace: [], Mode: "Scale" } }, Index: { Replace: ["HJ6332012"], Provider: "Calculate", ForceCNPrimaryPollutants: true } },
-                Comparison: { ReplaceWhenCurrentChange: false, Yesterday: { PollutantsProvider: "QWeather", IndexProvider: "ColorfulCloudsUS" } },
-                Calculate: { Algorithm: "EU_EAQI", AllowOverRange: true },
+                Current: { Pollutants: { Provider: "ColorfulClouds", Units: { Replace: [], Mode: "Scale" } }, Index: { Replace: ["HJ6332012"], Provider: "ColorfulCloudsCN", ForceCNPrimaryPollutants: true } },
+                Comparison: { ReplaceWhenCurrentChange: true, Yesterday: { PollutantsProvider: "ColorfulCloudsCN", IndexProvider: "ColorfulCloudsCN" } },
+                Calculate: { Algorithm: "WAQI_InstantCast_CN", AllowOverRange: true },
             },
-            API: { WAQI: { Token: null }, QWeather: { Token: null, Host: "devapi.qweather.com" }, ColorfulClouds: { Token: null } },
+            API: { QWeather: { Token: null, Host: "devapi.qweather.com" }, ColorfulClouds: { Token: null } },
         },
         Configs: {
             Availability: {
@@ -19,7 +19,7 @@ export default {
         },
     },
     Default: {
-        Settings: { LogLevel: "WARN" },
+        Settings: { LogLevel: "INFO" },
         Configs: {
             Storefront: {
                 AE: "143481",

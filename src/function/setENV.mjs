@@ -1,5 +1,5 @@
-import getStorage from "@nsnanocat/util/getStorage.mjs";
-import { Console, Lodash as _ } from "@nsnanocat/util";
+import getStorage from "../utils/getStorage.mjs";
+import { Lodash as _, Console } from "../utils/index.mjs";
 
 /**
  * Set Environment Variables

@@ -1,5 +1,5 @@
-import { Console } from "@nsnanocat/util";
 import * as WK2 from "../proto/apple/wk2.js";
+import { Console } from "../utils/index.mjs";
 
 export default class WeatherKit2 {
     static Name = "WeatherKit2";

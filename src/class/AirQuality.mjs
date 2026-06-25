@@ -1,4 +1,4 @@
-import { Console } from "@nsnanocat/util";
+import { Console } from "../utils/index.mjs";
 import SimplePrecisionMath from "./SimplePrecisionMath.mjs";
 
 export default class AirQuality {
@@ -396,32 +396,9 @@ export default class AirQuality {
      * @param {any} Settings - 全局设置对象
      * @returns {string} 带标准描述的 providerName
      */
-    static appendScaleToProviderName(airQuality, Settings) {
+    static appendScaleToProviderName(airQuality, _Settings) {
         const providerName = airQuality?.metadata?.providerName;
-        switch (providerName) {
-            case "和风天气":
-                return `${providerName}（国标，12年2月版）`;
-            case "彩云天气": {
-                const useUsa = airQuality?.scale === AirQuality.ToWeatherKitScale(AirQuality.Config.Scales.EPA_NowCast.weatherKitScale);
-                return `${providerName}（${useUsa ? "美标，18年9月版" : "国标，12年2月版"}）`;
-            }
-            case "iRingo":
-                switch (Settings?.AirQuality?.Calculate?.Algorithm) {
-                    case "EU_EAQI":
-                        return `${providerName} (ETC HE Report 2024/17)`;
-                    case "WAQI_InstantCast_US":
-                        return `${providerName} (WAQI InstantCast with EPA-454/B-24-002)`;
-                    case "WAQI_InstantCast_CN":
-                        return `${providerName} (InstantCast with HJ 633—2012)`;
-                    case "WAQI_InstantCast_CN_25_DRAFT":
-                        return `${providerName} (InstantCast with HJ 633 2025 DRAFT)`;
-                    case "UBA":
-                    default:
-                        return `${providerName} (FB001846)`;
-                }
-            default:
-                return providerName;
-        }
+        return providerName;
     }
 
     /**
@@ -512,7 +489,7 @@ export default class AirQuality {
      * 每种标准污染物对应的 index 列表。
      * - 若标准所需污染物缺失，返回该污染物 index=-1。
      */
-    static #PollutantsToIndexes(pollutants = [], pollutantScales) {
+    static #PollutantsToIndexes(pollutants, pollutantScales) {
         return pollutants.map(pollutant => {
             const index = AirQuality.#ComputePollutantIndex(pollutant, pollutant.pollutantType, pollutantScales?.[pollutant.pollutantType], AirQuality.Config.Units.Friendly);
             pollutant.index = index;
@@ -520,7 +497,7 @@ export default class AirQuality {
         });
     }
 
-    static PrimaryPollutant(pollutants = [], categories) {
+    static PrimaryPollutant(pollutants, categories) {
         Console.info("☑️ PrimaryPollutant");
         const failedPollutant = { pollutantType: "NOT_AVAILABLE", index: -1, categoryIndex: -1 };
 
@@ -642,7 +619,7 @@ export default class AirQuality {
             UBA: {
                 weatherKitScale: {
                     name: "UBA",
-                    version: "2414",
+                    version: "2604",
                 },
                 // Indexes below for calculation only, not for display
                 categories: {
@@ -740,7 +717,7 @@ export default class AirQuality {
             EU_EAQI: {
                 weatherKitScale: {
                     name: "EU.EAQI",
-                    version: "2414",
+                    version: "2604",
                     maxIndex: 60,
                 },
                 // Indexes below for calculation only, not for display
@@ -845,7 +822,7 @@ export default class AirQuality {
             HJ6332012: {
                 weatherKitScale: {
                     name: "HJ6332012",
-                    version: "2414",
+                    version: "2604",
                 },
                 categories: {
                     significantIndex: 3, // 轻度污染
@@ -1035,7 +1012,7 @@ export default class AirQuality {
             HJ6332025_DRAFT: {
                 weatherKitScale: {
                     name: "HJ6332012",
-                    version: "2414",
+                    version: "2604",
                 },
                 categories: {
                     significantIndex: 3, // 轻度污染
@@ -1231,7 +1208,7 @@ export default class AirQuality {
             EPA_NowCast: {
                 weatherKitScale: {
                     name: "EPA_NowCast",
-                    version: "2414",
+                    version: "2604",
                 },
                 categories: {
                     significantIndex: 3, // Unhealthy for Sensitive Groups
@@ -1388,7 +1365,7 @@ export default class AirQuality {
             WAQI_InstantCast_US: {
                 weatherKitScale: {
                     name: "EPA_NowCast",
-                    version: "2414",
+                    version: "2604",
                     maxIndex: 500,
                 },
                 categories: {
@@ -1517,7 +1494,7 @@ export default class AirQuality {
             WAQI_InstantCast_CN: {
                 weatherKitScale: {
                     name: "HJ6332012",
-                    version: "2414",
+                    version: "2604",
                     maxIndex: 500,
                 },
                 categories: {
@@ -1645,7 +1622,7 @@ export default class AirQuality {
             WAQI_InstantCast_CN_25_DRAFT: {
                 weatherKitScale: {
                     name: "HJ6332012",
-                    version: "2414",
+                    version: "2604",
                     maxIndex: 500,
                 },
                 categories: {
