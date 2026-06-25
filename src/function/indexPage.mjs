@@ -405,7 +405,7 @@ export function renderIndex(host, protocol) {
             <p>
                 © 2026 WeatherKit-Worker | MemeStudio 出品
                 •
-                <a href="https://github.com/meme-lau/WeatherKit" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>
+                <a href="https://github.com/meme-lau/weatherkit-worker" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>
                 •
                 基于 <a href="https://github.com/VirgilClyne" target="_blank" rel="noopener noreferrer">iRingo</a> 优化重构
             </p>

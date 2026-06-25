@@ -3,7 +3,7 @@ export default {
     "config.sgmodule": `#!name = WeatherKit-Worker
 #!desc = 本项目是对 NSRingo/WeatherKit 的自托管优化重构版本。支持独立自部署至 Cloudflare Workers。\\n1.解锁全部天气功能\\n2.替换空气质量数据\\n3.添加下一小时降水数据\\n4.添加天气数据
 #!author = meme[https://github.com/meme]
-#!homepage = https://github.com/meme-lau/WeatherKit
+#!homepage = https://github.com/meme-lau/weatherkit-worker
 #!icon = https://developer.apple.com/assets/elements/icons/weatherkit/weatherkit-128x128.png
 #!date = 2026-06-25 14:40:00
 
@@ -43,7 +43,7 @@ hostname = %APPEND% weatherkit.apple.com`,
     "config.plugin": `#!name = WeatherKit-Worker
 #!desc = 本项目是对 NSRingo/WeatherKit 的自托管优化重构版本。支持独立自部署至 Cloudflare Workers。\\n1.解锁全部天气功能\\n2.替换空气质量数据\\n3.添加下一小时降水数据\\n4.添加天气数据
 #!author = meme[https://github.com/meme]
-#!homepage = https://github.com/meme-lau/WeatherKit
+#!homepage = https://github.com/meme-lau/weatherkit-worker
 #!icon = https://developer.apple.com/assets/elements/icons/weatherkit/weatherkit-128x128.png
 #!system = iOS,iPadOS,macOS,watchOS
 #!date = 2026-06-25 14:40:00
@@ -85,7 +85,7 @@ hostname = weatherkit.apple.com`,
     "config.srmodule": `#!name = WeatherKit-Worker
 #!desc = 本项目是对 NSRingo/WeatherKit 的自托管优化重构版本。支持独立自部署至 Cloudflare Workers。\\n1.解锁全部天气功能\\n2.替换空气质量数据\\n3.添加下一小时降水数据\\n4.添加天气数据
 #!author = meme[https://github.com/meme]
-#!homepage = https://github.com/meme-lau/WeatherKit
+#!homepage = https://github.com/meme-lau/weatherkit-worker
 #!icon = https://developer.apple.com/assets/elements/icons/weatherkit/weatherkit-128x128.png
 #!date = 2026-06-25 14:40:00
 
@@ -131,7 +131,7 @@ desc: |-
   4.添加天气数据
 author: |-
   meme[https://github.com/meme]
-homepage: "https://github.com/meme-lau/WeatherKit"
+homepage: "https://github.com/meme-lau/weatherkit-worker"
 icon: "https://developer.apple.com/assets/elements/icons/weatherkit/weatherkit-128x128.png"
 date: "2026-06-25 14:40:00"
 
@@ -173,7 +173,7 @@ description: |-
   3.添加下一小时降水数据
   4.添加天气数据
 author: meme
-homepage: https://github.com/meme-lau/WeatherKit
+homepage: https://github.com/meme-lau/weatherkit-worker
 icon: https://developer.apple.com/assets/elements/icons/weatherkit/weatherkit-128x128.png
 dns: {}
 rules:
