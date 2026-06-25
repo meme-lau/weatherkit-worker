@@ -14,28 +14,28 @@ export function renderIndex(host, protocol) {
             icon: "🎈",
             filename: "config.plugin",
             desc: "适用于 Loon 的插件配置。集成 Apple WeatherKit 数据增强，支持下一小时降雨和空气质量优化。",
-            importUrl: `loon:///import?plugin=${encodeURIComponent(baseUrl + "/conf/config.plugin")}`,
+            importUrl: `loon://import?plugin=${encodeURIComponent(baseUrl + "/conf/config.plugin")}`,
         },
         {
             name: "Shadowrocket",
             icon: "🚀",
             filename: "config.srmodule",
-            desc: "适用于小火箭的模块配置。基于模块重写，解锁全部天气面板，实现本地第三方数据融合。",
-            importUrl: `shadowrocket:///add/module?url=${encodeURIComponent(baseUrl + "/conf/config.srmodule")}`,
+            desc: "适用于 小火箭 的模块配置。基于模块重写，解锁全部天气面板，实现本地第三方数据融合。",
+            importUrl: `shadowrocket://install?module=${encodeURIComponent(baseUrl + "/conf/config.srmodule")}`,
         },
         {
             name: "Stash",
             icon: "💎",
             filename: "config.stoverride",
             desc: "适用于 Stash 的覆写配置。拦截苹果天气 API 请求并并发预取和融合第三方数据源。",
-            importUrl: `stash:///install-override?url=${encodeURIComponent(baseUrl + "/conf/config.stoverride")}`,
+            importUrl: `stash://install-override?url=${encodeURIComponent(baseUrl + "/conf/config.stoverride")}`,
         },
         {
             name: "Egern",
             icon: "⚙️",
             filename: "config.yaml",
-            desc: "适用于 Egern 的 YAML 规则配置。采用标准规则拦截及动态重定向，可下载或复制链接导入。",
-            importUrl: null, // Egern 没有成熟的一键导入协议，仅支持下载和复制
+            desc: "适用于 Egern 的 YAML 规则配置。采用标准规则拦截及动态重定向，可下载、复制或直接一键导入。",
+            importUrl: `egern:///modules/new?url=${encodeURIComponent(baseUrl + "/conf/config.yaml")}`,
         }
     ];
 
@@ -403,7 +403,8 @@ export function renderIndex(host, protocol) {
 
         <footer>
             <p>
-                © 2026 WeatherKit-Worker
+                © 2026 WeatherKit-Worker | MemeStudio 出品
+                •
                 <a href="https://github.com/meme-lau/WeatherKit" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>
                 •
                 基于 <a href="https://github.com/VirgilClyne" target="_blank" rel="noopener noreferrer">iRingo</a> 优化重构
