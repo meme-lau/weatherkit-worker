@@ -1,4 +1,4 @@
-import { Console } from "@nsnanocat/util";
+import { Console } from "../utils/index.mjs";
 
 export default class Weather {
     static Name = "Weather";

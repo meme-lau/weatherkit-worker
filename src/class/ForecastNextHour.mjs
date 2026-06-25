@@ -1,4 +1,4 @@
-import { Console } from "@nsnanocat/util";
+import { Console } from "../utils/index.mjs";
 
 export default class ForecastNextHour {
     Name = "ForecastNextHour";
@@ -103,7 +103,7 @@ export default class ForecastNextHour {
         const precipitationType = ForecastNextHour.PrecipitationType(description);
         // refer: https://docs.caiyunapp.com/weather-api/v2/v2.6/tables/precip.html
 
-        minutes = minutes.map((minute, i) => {
+        minutes = minutes.map((minute, _i) => {
             // 根据precipitationIntensity来猜测生成perceivedPrecipitationIntensity
             minute.precipitationIntensity = Math.trunc(minute.precipitationIntensity * 1000000) / 1000000;
             minute.perceivedPrecipitationIntensity = ForecastNextHour.#ConvertPrecipitationIntensity(minute.precipitationIntensity, units);

@@ -1,4 +1,4 @@
-import { Console } from "@nsnanocat/util";
+import { Console } from "../utils/index.mjs";
 
 export default function parseWeatherKitURL(url = new URL($request.url)) {
     Console.info("☑️ parseWeatherKitURL");

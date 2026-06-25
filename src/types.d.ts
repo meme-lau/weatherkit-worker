@@ -188,7 +188,7 @@ export interface Settings {
                  * - `'ColorfulCloudsCN'` - 彩云天气（国标，12年2月版）
                  * - `'QWeather'` - 和风天气（国标，12年2月版）
                  *
-                 * @defaultValue "Calculate"
+                 * @defaultValue "ColorfulCloudsCN"
                  */
                 Provider?: "Calculate" | "ColorfulCloudsUS" | "ColorfulCloudsCN" | "QWeather";
                 /**
@@ -245,7 +245,7 @@ export interface Settings {
                  * - `'ColorfulCloudsCN'` - 彩云天气（国标，12年2月版）
                  * - `'QWeather'` - 和风天气（国标，12年2月版）
                  *
-                 * @defaultValue "ColorfulCloudsUS"
+                 * @defaultValue "ColorfulCloudsCN"
                  */
                 IndexProvider?: "Calculate" | "ColorfulCloudsUS" | "ColorfulCloudsCN" | "QWeather";
             };
@@ -266,7 +266,7 @@ export interface Settings {
              * - `'WAQI_InstantCast_CN'` - 国标InstantCast（HJ 633—2012）
              * - `'WAQI_InstantCast_CN_25_DRAFT'` - 国标InstantCast（HJ 633 2025年草案）
              *
-             * @defaultValue "EU_EAQI"
+             * @defaultValue "WAQI_InstantCast_CN"
              */
             Algorithm?: "None" | "UBA" | "EU_EAQI" | "WAQI_InstantCast_US" | "WAQI_InstantCast_CN" | "WAQI_InstantCast_CN_25_DRAFT";
             /**

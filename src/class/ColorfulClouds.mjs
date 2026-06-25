@@ -1,8 +1,7 @@
-import { Console, fetch, Lodash as _ } from "@nsnanocat/util";
-import Weather from "./Weather.mjs";
+import { Console, fetch } from "../utils/index.mjs";
 import AirQuality from "./AirQuality.mjs";
 import ForecastNextHour from "./ForecastNextHour.mjs";
-import providerNameToLogo from "../function/providerNameToLogo.mjs";
+import Weather from "./Weather.mjs";
 
 export default class ColorfulClouds {
     constructor(parameters, token) {
@@ -20,6 +19,7 @@ export default class ColorfulClouds {
 
     #cache = {
         realtime: {},
+        yesterdayHourly: undefined,
     };
 
     #Config = {
@@ -177,7 +177,7 @@ export default class ColorfulClouds {
                                 language: "zh-CN", // `${this.language}-${this.country}`, // body?.lang,
                                 latitude: body?.location?.[0],
                                 longitude: body?.location?.[1],
-                                providerLogo: providerNameToLogo("彩云天气", this.version),
+
                                 providerName: "彩云天气",
                                 readTime: timeStamp,
                                 reportedTime: body?.server_time,
@@ -290,7 +290,7 @@ export default class ColorfulClouds {
                                 language: "zh-CN", // `${this.language}-${this.country}`,
                                 latitude: body?.location?.[0],
                                 longitude: body?.location?.[1],
-                                providerLogo: providerNameToLogo("彩云天气", this.version),
+
                                 providerName: "彩云天气",
                                 readTime: timeStamp,
                                 reportedTime: body?.server_time,
@@ -418,7 +418,6 @@ export default class ColorfulClouds {
             latitude,
             expireTime: timeStamp + 60 * 60,
             attributionUrl: "https://www.caiyunapp.com/h5",
-            providerLogo: providerNameToLogo("彩云天气", this.version),
             temporarilyUnavailable,
             readTime: timeStamp,
             sourceType: "MODELED",
@@ -605,10 +604,23 @@ export default class ColorfulClouds {
         };
     }
 
+    /**
+     * 预取昨日小时数据，供 YesterdayAirQuality 使用
+     * 与 WeatherKit fetch 并发，减少总体延迟
+     * @returns {Promise<object>} 昨日小时数据 Promise
+     */
+    async prefetchYesterdayHourly() {
+        Console.info("☑️ prefetchYesterdayHourly");
+        this.#cache.yesterdayHourly = this.#Hourly(1, Math.trunc((Date.now() - 864e5) / 1000));
+        const result = await this.#cache.yesterdayHourly;
+        Console.info("✅ prefetchYesterdayHourly");
+        return result;
+    }
+
     async YesterdayAirQuality(useUsa = true) {
         Console.info("☑️ YesterdayAirQuality");
 
-        const yesterdayHourly = await this.#Hourly(1, Math.trunc((Date.now() - 864e5) / 1000));
+        const yesterdayHourly = await (this.#cache.yesterdayHourly ?? this.#Hourly(1, Math.trunc((Date.now() - 864e5) / 1000)));
         const scale = useUsa ? AirQuality.Config.Scales.EPA_NowCast : AirQuality.Config.Scales.HJ6332012;
         const particularAirQuality = {
             previousDayComparison: AirQuality.Config.CompareCategoryIndexes.UNKNOWN,
