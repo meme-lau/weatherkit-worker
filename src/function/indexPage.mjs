@@ -1051,6 +1051,22 @@ export function renderIndex(host, protocol) {
                                 <span class="form-desc" style="margin-top:0.2rem">即使系统已有昨日对比数据，当今日空气指数发生变化时，强制重新计算并替换昨日对比数据。</span>
                             </label>
                         </div>
+
+                        <div class="checkbox-group">
+                            <input class="checkbox-input" type="checkbox" id="replaceDaily">
+                            <label class="checkbox-label" for="replaceDaily">
+                                <strong>[天气 - 逐日预报] 启用替换</strong><br>
+                                <span class="form-desc" style="margin-top:0.2rem">使用选定的第三方数据源替换 10 天逐日预报（会消耗较多 API 请求与网络额度）。</span>
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input class="checkbox-input" type="checkbox" id="replaceHourly">
+                            <label class="checkbox-label" for="replaceHourly">
+                                <strong>[天气 - 逐小时预报] 启用替换</strong><br>
+                                <span class="form-desc" style="margin-top:0.2rem">使用选定的第三方数据源替换 10 天逐小时预报（数据包较大，会增加响应耗时与 API 消耗）。</span>
+                            </label>
+                        </div>
                     </div>
 
                     <button class="btn btn-primary btn-next" id="saveConfigBtn">保存并应用配置</button>
@@ -1157,6 +1173,8 @@ export function renderIndex(host, protocol) {
         const pollutantsUnitsMode = document.getElementById("pollutantsUnitsMode");
         const indexReplace = document.getElementById("indexReplace");
         const unitsReplace = document.getElementById("unitsReplace");
+        const replaceDaily = document.getElementById("replaceDaily");
+        const replaceHourly = document.getElementById("replaceHourly");
         
         // 选项卡与控制
         const stepConfig = document.getElementById("stepConfig");
@@ -1198,7 +1216,9 @@ export function renderIndex(host, protocol) {
                 pollutantsUnitsMode: "Scale",
                 forceCNPrimaryPollutants: false,
                 allowOverRange: false,
-                replaceWhenCurrentChange: false
+                replaceWhenCurrentChange: false,
+                replaceDaily: false,
+                replaceHourly: false
             }
         };
 
@@ -1227,6 +1247,8 @@ export function renderIndex(host, protocol) {
                 presetData.Advanced.forceCNPrimaryPollutants = forceCNPrimaryPollutants.checked;
                 presetData.Advanced.allowOverRange = allowOverRange.checked;
                 presetData.Advanced.replaceWhenCurrentChange = replaceWhenCurrentChange.checked;
+                presetData.Advanced.replaceDaily = replaceDaily.checked;
+                presetData.Advanced.replaceHourly = replaceHourly.checked;
             }
         }
 
@@ -1274,6 +1296,8 @@ export function renderIndex(host, protocol) {
                 forceCNPrimaryPollutants.checked = presetData.Advanced.forceCNPrimaryPollutants;
                 allowOverRange.checked = presetData.Advanced.allowOverRange;
                 replaceWhenCurrentChange.checked = presetData.Advanced.replaceWhenCurrentChange;
+                replaceDaily.checked = presetData.Advanced.replaceDaily;
+                replaceHourly.checked = presetData.Advanced.replaceHourly;
             }
         }
 
@@ -1321,7 +1345,9 @@ export function renderIndex(host, protocol) {
                 config = {
                     Weather: { 
                         Provider: presetData.Advanced.weatherProvider,
-                        Replace: presetData.Advanced.weatherReplace ? presetData.Advanced.weatherReplace.split(",").map(s => s.trim()).filter(Boolean) : undefined
+                        Replace: presetData.Advanced.weatherReplace ? presetData.Advanced.weatherReplace.split(",").map(s => s.trim()).filter(Boolean) : undefined,
+                        ReplaceDaily: presetData.Advanced.replaceDaily,
+                        ReplaceHourly: presetData.Advanced.replaceHourly
                     },
                     NextHour: { Provider: presetData.Advanced.nextHourProvider },
                     AirQuality: {
@@ -1381,6 +1407,8 @@ export function renderIndex(host, protocol) {
                                 presetData.Advanced.forceCNPrimaryPollutants === true ||
                                 presetData.Advanced.replaceWhenCurrentChange === true ||
                                 presetData.Advanced.allowOverRange === true ||
+                                presetData.Advanced.replaceDaily === true ||
+                                presetData.Advanced.replaceHourly === true ||
                                 presetData.Advanced.calculateAlgorithm !== "WAQI_InstantCast_CN" ||
                                 (presetData.Advanced.weatherReplace !== "" && presetData.Advanced.weatherReplace !== "CN") ||
                                 !isDefaultIndexReplace ||
@@ -1568,7 +1596,7 @@ export function renderIndex(host, protocol) {
             pollutantsProvider, indexProvider, yesterdayProvider, calculateAlgorithm, 
             forceCNPrimaryPollutants, allowOverRange, replaceWhenCurrentChange,
             weatherReplace, yesterdayPollutantsProvider, pollutantsUnitsMode,
-            indexReplace, unitsReplace
+            indexReplace, unitsReplace, replaceDaily, replaceHourly
         ];
         inputs.forEach(input => {
             if (input) {
@@ -1610,6 +1638,8 @@ export function renderIndex(host, protocol) {
             presetData.Advanced.replaceWhenCurrentChange = decoded.AirQuality?.Comparison?.ReplaceWhenCurrentChange === true;
             presetData.Advanced.allowOverRange = decoded.AirQuality?.Calculate?.AllowOverRange === true;
             presetData.Advanced.calculateAlgorithm = decoded.AirQuality?.Calculate?.Algorithm || "WAQI_InstantCast_CN";
+            presetData.Advanced.replaceDaily = decoded.Weather?.ReplaceDaily === true;
+            presetData.Advanced.replaceHourly = decoded.Weather?.ReplaceHourly === true;
 
             const indexReplaceArr = decoded.AirQuality?.Current?.Index?.Replace ?? ["HJ6332012"];
             presetData.Advanced.indexReplace = indexReplaceArr[0] || "HJ6332012";
@@ -1640,6 +1670,8 @@ export function renderIndex(host, protocol) {
                                       !presetData.Advanced.forceCNPrimaryPollutants &&
                                       !presetData.Advanced.replaceWhenCurrentChange &&
                                       !presetData.Advanced.allowOverRange &&
+                                      !presetData.Advanced.replaceDaily &&
+                                      !presetData.Advanced.replaceHourly &&
                                       presetData.Advanced.calculateAlgorithm === "WAQI_InstantCast_CN";
 
             if (isQWeather && isDefaultAdvanced) {
