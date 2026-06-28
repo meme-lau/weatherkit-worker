@@ -186,60 +186,96 @@ export default class ForecastNextHour {
     static Summary(minutes = []) {
         Console.info("☑️ Summary");
         const Summaries = [];
-        const Summary = {
+        let Summary = {
             condition: "CLEAR",
             startTime: 0,
             precipitationChance: 0,
             precipitationIntensity: 0,
-            //beginCondition: "",
-            //endCondition: "",
             maxCondition: "",
             clear: true,
         };
+        let conditionsCount = {};
         const Length = Math.min(71, minutes.length);
+
+        // 根据当前段内每分钟的 conditions 频次，判定最具代表性的条件
+        const getRepresentativeCondition = (counts) => {
+            const heavyRain = (counts["HEAVY_RAIN"] || 0) + (counts["HEAVY_SNOW"] || 0);
+            const moderateRain = (counts["RAIN"] || 0) + (counts["SNOW"] || 0);
+            const lightRain = (counts["DRIZZLE"] || 0) + (counts["FLURRIES"] || 0);
+            const possibleRain = (counts["POSSIBLE_DRIZZLE"] || 0) + (counts["POSSIBLE_FLURRIES"] || 0);
+            
+            const totalMinutes = Object.values(counts).reduce((a, b) => a + b, 0);
+            // 阈值：大雨至少需要累计 12 分钟（总时长的 20%），但若该段很短则按 20% 折算，且最少 3 分钟
+            const threshold = Math.max(3, Math.min(12, Math.round(totalMinutes * 0.2)));
+
+            if (heavyRain >= threshold) {
+                return counts["HEAVY_RAIN"] ? "HEAVY_RAIN" : "HEAVY_SNOW";
+            }
+            if (heavyRain + moderateRain >= threshold) {
+                return counts["RAIN"] ? "RAIN" : "SNOW";
+            }
+            if (heavyRain + moderateRain + lightRain >= threshold) {
+                return counts["DRIZZLE"] ? "DRIZZLE" : "FLURRIES";
+            }
+            if (heavyRain + moderateRain + lightRain + possibleRain > 0) {
+                return counts["POSSIBLE_DRIZZLE"] ? "POSSIBLE_DRIZZLE" : "POSSIBLE_FLURRIES";
+            }
+            return "CLEAR";
+        };
+
         for (let i = 0; i < Length; i++) {
             const minute = minutes[i];
             const previousMinute = minutes[i - 1];
+
+            // 统计计数
+            conditionsCount[minute.condition] = (conditionsCount[minute.condition] || 0) + 1;
+
             switch (i) {
                 case 0: // 第一个
                     Summary.startTime = minute.startTime;
-                    Summary.condition = minute.summaryCondition; // condition 只关心降水类型，不关心具体强弱描述
+                    Summary.condition = minute.summaryCondition;
                     Summary.precipitationChance = minute.precipitationChance;
                     Summary.precipitationIntensity = minute.precipitationIntensity;
-                    //Summary.beginCondition = minute.condition;
-                    //Summary.endCondition = "";
-                    Summary.maxCondition = minute.condition;
                     Summary.clear = minute.clear;
+                    if (Length === 1) {
+                        Summary.endTime = 0;
+                        Summary.maxCondition = getRepresentativeCondition(conditionsCount);
+                        Summaries.push({ ...Summary });
+                    }
                     break;
                 case Length - 1: // 最后一个
-                    Summary.endTime = 0; // ⚠️空值必须写零！
-                    //Summary.endCondition = minute.condition;
+                    Summary.endTime = 0;
                     Summary.clear = minute.clear;
+                    Summary.maxCondition = getRepresentativeCondition(conditionsCount);
                     Console.debug(`Summaries[${i}]`, JSON.stringify({ ...minute, ...Summary }, null, 2));
                     Summaries.push({ ...Summary });
                     break;
                 default: // 中间
                     if (minute.summaryCondition !== previousMinute.summaryCondition) {
-                        // 结束当前summary
+                        // 扣除属于新段的当前 minute 统计值
+                        conditionsCount[minute.condition]--;
+                        if (conditionsCount[minute.condition] === 0) delete conditionsCount[minute.condition];
+
                         Summary.endTime = minute.startTime;
-                        //Summary.endCondition = previousMinute.condition;
+                        Summary.maxCondition = getRepresentativeCondition(conditionsCount);
                         Console.debug(`Summaries[${i}]`, JSON.stringify({ ...previousMinute, ...Summary }, null, 2));
                         Summaries.push({ ...Summary });
 
                         // 开始新的summary
-                        Summary.startTime = minute.startTime;
-                        Summary.condition = minute.summaryCondition; // condition 只关心降水类型，不关心具体强弱描述
-                        Summary.precipitationChance = minute.precipitationChance;
-                        Summary.precipitationIntensity = minute.precipitationIntensity;
-                        //Summary.beginCondition = minute.condition;
-                        //Summary.endCondition = ""; // 重置
-                        Summary.maxCondition = minute.condition; // 重置
-                        Summary.clear = minute.clear;
+                        conditionsCount = {};
+                        conditionsCount[minute.condition] = 1;
+                        Summary = {
+                            startTime: minute.startTime,
+                            condition: minute.summaryCondition,
+                            precipitationChance: minute.precipitationChance,
+                            precipitationIntensity: minute.precipitationIntensity,
+                            maxCondition: "",
+                            clear: minute.clear
+                        };
                     } else {
                         // 条件相同，更新最大值
                         Summary.precipitationChance = Math.max(Summary.precipitationChance, minute.precipitationChance);
                         Summary.precipitationIntensity = Math.max(Summary.precipitationIntensity, minute.precipitationIntensity);
-                        if (Summary.precipitationIntensity === minute.precipitationIntensity) Summary.maxCondition = minute.condition;
                     }
                     break;
             }
@@ -252,6 +288,12 @@ export default class ForecastNextHour {
     static Condition(summaries = []) {
         Console.info("☑️ Condition");
         const Conditions = [];
+        if (summaries.length > 4) {
+            summaries = summaries.slice(0, 4);
+            if (summaries[3]) {
+                summaries[3].endTime = 0;
+            }
+        }
         // 先通过 summaries 定基调
         switch (summaries.map(summary => summary.clear).join("|")) {
             case "true": {
@@ -502,6 +544,31 @@ export default class ForecastNextHour {
                     startTime: START2.startTime, // START2 期间
                     endTime: 0, // START2 期间
                 });
+                break;
+            }
+            default: {
+                // 兜底逻辑：如果前面的模式都匹配不上，则寻找是否有降水段
+                const rainSummary = summaries.find(summary => !summary.clear);
+                if (rainSummary) {
+                    Conditions.push({
+                        beginCondition: rainSummary.maxCondition,
+                        endCondition: rainSummary.maxCondition,
+                        forecastToken: "CONSTANT",
+                        parameters: [],
+                        startTime: rainSummary.startTime,
+                        endTime: 0,
+                    });
+                } else if (summaries.length > 0) {
+                    const CLEAR = summaries[0];
+                    Conditions.push({
+                        beginCondition: CLEAR.maxCondition,
+                        endCondition: CLEAR.maxCondition,
+                        forecastToken: "CLEAR",
+                        parameters: [],
+                        startTime: CLEAR.startTime,
+                        endTime: 0,
+                    });
+                }
                 break;
             }
         }
