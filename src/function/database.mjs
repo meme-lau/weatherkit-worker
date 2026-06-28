@@ -5,7 +5,7 @@ export default {
             Weather: { Replace: ["CN"], Provider: "ColorfulClouds" },
             NextHour: { Provider: "ColorfulClouds" },
             AirQuality: {
-                Current: { Pollutants: { Provider: "ColorfulClouds", Units: { Replace: [], Mode: "Scale" } }, Index: { Replace: ["HJ6332012"], Provider: "ColorfulCloudsCN", ForceCNPrimaryPollutants: true } },
+                Current: { Pollutants: { Provider: "ColorfulClouds", Units: { Replace: [], Mode: "Scale" } }, Index: { Replace: ["HJ6332012"], Provider: "ColorfulCloudsCN", ForceCNPrimaryPollutants: false } },
                 Comparison: { ReplaceWhenCurrentChange: true, Yesterday: { PollutantsProvider: "ColorfulCloudsCN", IndexProvider: "ColorfulCloudsCN" } },
                 Calculate: { Algorithm: "WAQI_InstantCast_CN", AllowOverRange: true },
             },

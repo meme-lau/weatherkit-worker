@@ -14,6 +14,16 @@ export class Console {
         });
     };
 
+    static #shouldSkip = msg => {
+        if (Console.#level < 4) {
+            const first = msg[0];
+            if (typeof first === "string" && (first.startsWith("☑️") || first.startsWith("✅"))) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     static debug = (...msg) => {
         if (Console.#level < 4) return;
         console.debug(...Console.#formatMsg(msg));
@@ -21,6 +31,7 @@ export class Console {
 
     static info = (...msg) => {
         if (Console.#level < 3) return;
+        if (Console.#shouldSkip(msg)) return;
         console.info(...Console.#formatMsg(msg));
     };
 
@@ -39,6 +50,7 @@ export class Console {
 
     static log = (...msg) => {
         if (Console.#level === 0) return;
+        if (Console.#shouldSkip(msg)) return;
         console.log(...Console.#formatMsg(msg));
     };
 

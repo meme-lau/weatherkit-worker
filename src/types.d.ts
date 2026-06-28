@@ -196,7 +196,7 @@ export interface Settings {
                  *
                  * 忽略国标（HJ 633—2012）的AQI > 50规定，始终将IAQI最大的空气污染物作为主要污染物。
                  *
-                 * @defaultValue true
+                 * @defaultValue false
                  */
                 ForceCNPrimaryPollutants?: boolean;
             };
