@@ -1,51 +1,34 @@
-# 🌤 WeatherKit-Worker
+# <img src="https://developer.apple.com/assets/elements/icons/weatherkit/weatherkit-128x128.png" width="32" height="32" align="center"> WeatherKit-Worker
 
-这是一个专门为 **Cloudflare Workers** 优化的 WeatherKit 远程代理项目。本项目是对 [NSRingo/WeatherKit](https://github.com/NSRingo/WeatherKit) 的重构与改造，使其支持自主独立部署。基于 Hono.js 开发，移除了所有本地繁琐的脚本代理依赖，提供一键独立部署与代理配置的动态下载。
+这是一个对 [NSRingo/WeatherKit](https://github.com/NSRingo/WeatherKit) 进行重构与改造的项目，使其支持自主独立部署在 **Cloudflare Workers** 与 **Vercel**。移除了所有本地繁琐的脚本代理依赖，提供一键独立部署与代理配置的动态下载。
 
-关于本项目的架构设计、内部原理与工作流，请阅读 [项目架构设计与实现原理](docs/architecture.md) 以及 [BoxJS 配置项与系统默认参数映射说明](docs/boxjs-settings-mapping.md)。
-
----
-
-## 🌟 核心特性
-
-- ⚡ **无缝部署**：支持 Cloudflare Workers 独立自托管部署，无需依赖任何第三方中转服务。
-- 📦 **极简化架构**：移除本地配置编译工具链，代理配置全内置在代码中，随时发布。
-- 🔄 **动态重写下载**：直接访问部署的 Worker 地址即可下载客户端配置，**自动动态将配置中的重定向域名替换为您部署的 Worker 域名**。
-- 🛠️ **多客户端原生支持**：直接提供对主流网络代理工具（Surge、Loon、Shadowrocket、Stash、Egern）配置的完整输出与适配。
-- 🌤️ **天气体验增强**：
-  - 解锁全球完整的 WeatherKit 天气服务功能。
-  - 支持融合和替换第三方空气质量（如彩云天气、和风天气等）。
-  - 新增下一小时降水预测及昨日天气对比等扩展数据。
-  - 精准拦截 QUIC / UDP (443端口) 握手包以避免请求回退。
 
 ---
 
 ## 🚀 部署指南
 
-您可以选择以下任意一种方式进行部署：
+### 部署到 Cloudflare Workers
 
-### 选项 A：通过 Cloudflare 网页后台部署（推荐，零门槛）
+#### 方式 1：通过 Cloudflare 网页后台部署
 1. 登录您的 [Cloudflare 仪表板](https://dash.cloudflare.com/)。
 2. 依次进入 **Workers 和 Pages** -> **创建** -> **克隆 Git 存储库**。
 3. 在 **Git 存储库 URL** 输入框中，直接填入本项目的 Git 地址：
    `https://github.com/meme-lau/weatherkit-worker.git`
 4. 点击 **下一步**，Cloudflare 将在云端自动完成打包构建并为您分配部署的 Workers 域名。
 
----
-
-### 选项 B：通过本地命令行部署（适合开发者）
-#### 1. 准备工作
+#### 方式 2：通过本地命令行部署（适合开发者）
+##### 1. 准备工作
 - 确保您本地已安装 [Node.js](https://nodejs.org/) 环境。
 - 准备一个 Cloudflare 账号。
 
-#### 2. 克隆项目与安装依赖
+##### 2. 克隆项目与安装依赖
 ```bash
 git clone https://github.com/meme-lau/weatherkit-worker.git
 cd weatherkit-worker
 npm install
 ```
 
-#### 3. 登录并一键部署
+##### 3. 登录并一键部署
 ```bash
 # 登录您的 Cloudflare 账号
 npx wrangler login
@@ -56,22 +39,47 @@ npm run deploy:wrangler
 
 ---
 
-## ⚙️ 可视化配置中心与一键导入
+### 部署到 Vercel
 
-部署成功后，**直接在浏览器中访问您部署的 Worker 根路径地址**即可访问全新的**无状态可视化配置中心**：
-`https://<your-worker-host>/`
+#### 方式 1：通过 Vercel 网页后台部署
+1. 登录您的 [Vercel 控制台](https://vercel.com/)。
+2. 点击 **Add New** -> **Project**。
+3. 导入您 Fork 或克隆的 GitHub 仓库。
+4. Vercel 将会自动识别根目录下的 `vercel.json` 并应用配置（无需修改构建配置，框架默认选择 `Other` 即可）。
+5. 点击 **Deploy** 进行部署。
 
-### 🎨 核心功能特点：
-- 🔒 **无状态安全设计**：您填写的 API 令牌（如彩云/和风 API Token）及其他偏好设置**不会上传或保存在云端服务器**，而是以无状态的 Base64 方式直接编码在重定向 URL 路径中，安全私密，且配置会自动保存在您的浏览器本地缓存中以方便复用。
-- 📊 **多步骤配置向导**：
-  - **第一步：服务参数配置**：一站式填写 API 令牌，选择天气数据源、未来一小时降水数据源、今日/昨日空气指数计算服务提供商。展开“高级配置选项”还可调节天气替换范围国家码、昨日污染物细分数据源、今日/昨日污染物单位转换模式、今日空气指数 18 种不同标准的替换目标，以及选择内置算法公式（支持 HJ 633 2025年草案）。
-  - **第二步：选择客户端导入**：完美适配 Surge、Loon、Shadowrocket、Stash、Egern，支持**一键拉起导入**、**复制订阅链接**或**直接下载配置**。
+#### 方式 2：通过 Vercel CLI 本地命令行部署
+1. 在本地全局安装 Vercel 命令行工具：
+   ```bash
+   npm install -g vercel
+   ```
+2. 在项目根目录下执行部署指令：
+   ```bash
+   # 登录 Vercel 账号
+   vercel login
 
-> 💡 **提示**：当客户端通过生成的重载 URL 请求配置时，服务端会自动将配置文件中的占位符 `__HOST__` 替换为您当前的 Worker 部署域名，并把 Base64 的偏好设置实时无缝注入，实现无需手动修改的极简部署与使用。
+   # 部署至生产环境
+   vercel --prod
+   ```
 
 ---
 
-## 📄 License & 致谢
+## ⚙️ 可视化配置中心与一键导入
 
-- **作者/重构优化**：[meme](https://github.com/meme)
-- **致谢**：原项目基于 [VirgilClyne/iRingo](https://github.com/VirgilClyne) 进行了简化与 CF Worker 适配优化重构。
+部署成功后，**直接在浏览器中访问您部署的服务根路径地址**即可打开专有的**无状态配置中心**：
+`https://<your-deployed-host>/`
+
+| 配置中心主页 | 自定义参数配置面板 |
+| :---: | :---: |
+| <img src="3c8a01019ba9969d481fa773173e5c90.jpg" width="290" alt="配置中心主页" /> | <img src="a32af4e4e75a677a6931c6b3bdc986df.jpg" width="290" alt="配置面板" /> |
+
+### 🎨 核心功能特点
+
+- ⚡ **极简客户端导入**：界面预整合了主流代理客户端卡片（**Shadowrocket、Surge、Loon、Stash、Egern**）。选中对应客户端，即可直接进行**一键拉起导入**、**一键复制订阅链接**或**直接下载配置文件**。
+- ⚙️ **多预设参数配置 (Preset Panels)**：
+  - **快速预设选项卡**：支持在 **“纯彩云配置”**、**“纯和风配置”** 与 **“高级配置”** 间无缝切换，快速设置彩云 Token 或和风 Token & Host。
+  - **数据源深度定制**：在高级配置中，可独立选择并混合搭配天气、降水、空气指数、污染物等不同提供商。
+  - **内置算法与多国标准适配**：内置空气质量换算公式，支持中国国标 (HJ 633-2012 / 2025年草案)、美国 NowCast、欧盟 EAQI、德国 LQI 等；支持多达 18 种空气替换目标标准。
+  - **性能与额外开关**：提供**边缘节点缓存 (EdgeCache)** 开关提升二次请求响应速度，并可自由开启逐日/逐小时预报数据源替换。
+- 💾 **一键分享与备份**：提供“备份/分享此配置页链接”按钮，点击后将当前全部配置状态编码打包进 URL 链接中。您可以通过该链接在其他设备上直接还原并同步您的所有设置。
+
