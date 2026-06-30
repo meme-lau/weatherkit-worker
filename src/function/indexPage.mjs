@@ -816,9 +816,9 @@ export function renderIndex(host, protocol) {
 
         <footer>
             <p>
-                © 2026 WeatherKit-Worker | MemeStudio 出品
+               By MemeStudio
                 •
-                <a href="https://github.com/meme-lau/weatherkit-worker" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>
+                <a href="https://github.com/meme-lau/weatherkit-worker" target="_blank" rel="noopener noreferrer">GitHub</a>
                 •
                 基于 <a href="https://nsringo.github.io/guide/Weather/weather-kit" target="_blank" rel="noopener noreferrer">iRingo</a> 优化重构
             </p>
