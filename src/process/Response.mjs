@@ -43,7 +43,7 @@ export async function Response($request, $response, context = {}) {
     // airQualityScale 请求：Apple 200 直接透传，404 则本地构建
     if (url.pathname.startsWith("/api/v1/airQualityScale/")) {
         if ($response.status === 200) {
-            Console.log(`[iRingo] airQualityScale Apple 返回 200，透传: ${url.pathname}`);
+            Console.log(`[proxy] airQualityScale Apple 返回 200，透传: ${url.pathname}`);
             return $response;
         }
         // Apple 返回 404 或其他错误，本地构建
@@ -52,7 +52,7 @@ export async function Response($request, $response, context = {}) {
         const scaleName = pathParts[4] ?? "";
         const localScale = AirQualityScale.buildScale(language, scaleName);
         if (localScale) {
-            Console.log(`[iRingo] airQualityScale Apple 返回 ${$response.status}，本地构建: ${scaleName}`);
+            Console.log(`[proxy] airQualityScale Apple 返回 ${$response.status}，本地构建: ${scaleName}`);
             $response.status = 200;
             $response.headers = { ...$response.headers, ...localScale.headers };
             $response.body = localScale.body;
@@ -109,7 +109,7 @@ export async function Response($request, $response, context = {}) {
                     const parameters = preParameters || parseWeatherKitURL(url);
                     const shouldReplace = Settings?.Weather?.Replace?.includes(parameters.country);
                     if (!shouldReplace) {
-                        Console.log(`[iRingo] 国家 ${parameters.country} 无需替换，直接跳过 FlatBuffer 编解码。`);
+                        Console.log(`[proxy] 国家 ${parameters.country} 无需替换，直接跳过 FlatBuffer 编解码。`);
                         break;
                     }
 
@@ -252,7 +252,7 @@ async function InjectForecastDaily(forecastDaily, Settings, enviroments, preFetc
     Console.debug("☑️ InjectForecastDaily");
     const replaceDaily = Settings?.Weather?.ReplaceDaily ?? true;
     if (!replaceDaily || !Settings?.Weather?.Replace?.includes(enviroments.country)) {
-        Console.warn("InjectForecastDaily", `Unreplaced or skipped country: ${enviroments.country}`);
+        Console.info("InjectForecastDaily", `Unreplaced or skipped country: ${enviroments.country}`);
         Console.debug("✅ InjectForecastDaily");
         return forecastDaily;
     }
@@ -296,7 +296,7 @@ async function InjectForecastHourly(forecastHourly, Settings, enviroments, preFe
     Console.debug("☑️ InjectForecastHourly");
     const replaceHourly = Settings?.Weather?.ReplaceHourly ?? true;
     if (!replaceHourly || !Settings?.Weather?.Replace?.includes(enviroments.country)) {
-        Console.warn("InjectForecastHourly", `Unreplaced or skipped country: ${enviroments.country}`);
+        Console.info("InjectForecastHourly", `Unreplaced or skipped country: ${enviroments.country}`);
         Console.debug("✅ InjectForecastHourly");
         return forecastHourly;
     }
