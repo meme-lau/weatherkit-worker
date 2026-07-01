@@ -1,5 +1,5 @@
 import AirQuality from "../class/AirQuality.mjs";
-import { Console, fetch, time } from "../utils/index.mjs";
+import { Console, fetch } from "../utils/index.mjs";
 import ForecastNextHour from "./ForecastNextHour.mjs";
 import Weather from "./Weather.mjs";
 
@@ -566,7 +566,11 @@ export default class QWeather {
         return forecastDaily;
     }
 
-    async #HistoricalAir(locationID = new Number(), date = time("yyyyMMdd", Date.now() - 24 * 60 * 60 * 1000)) {
+    async #HistoricalAir(locationID = new Number(), date) {
+        if (!date) {
+            const d = new Date(Date.now() - 86400000);
+            date = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+        }
         Console.debug("☑️ HistoricalAir", `locationID: ${locationID}`, `date: ${date}`);
         const request = {
             url: `${this.endpoint}/v7/historical/air/?location=${locationID}&date=${date}`,
