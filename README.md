@@ -42,25 +42,37 @@ npm run deploy:wrangler
 ### 部署到 Vercel
 
 #### 方式 1：通过 Vercel 网页后台部署
+
 1. 登录您的 [Vercel 控制台](https://vercel.com/)。
-2. 点击 **Add New** -> **Project**。
+2. 依次点击 **Add New** -> **Project**。
 3. 导入您 Fork 或克隆的 GitHub 仓库。
 4. Vercel 将会自动识别根目录下的 `vercel.json` 并应用配置（无需修改构建配置，框架默认选择 `Other` 即可）。
-5. 点击 **Deploy** 进行部署。
+5. 点击 **Deploy** 进行部署，Vercel 将在云端自动完成打包构建并为您分配部署的 Vercel 域名。
 
-#### 方式 2：通过 Vercel CLI 本地命令行部署
-1. 在本地全局安装 Vercel 命令行工具：
-   ```bash
-   npm install -g vercel
-   ```
-2. 在项目根目录下执行部署指令：
-   ```bash
-   # 登录 Vercel 账号
-   vercel login
+#### 方式 2：通过本地命令行部署（适合开发者）
 
-   # 部署至生产环境
-   vercel --prod
-   ```
+##### 1. 准备工作
+
+- 确保您本地已安装 [Node.js](https://nodejs.org/) 环境。
+- 准备一个 Vercel 账号。
+
+##### 2. 克隆项目与安装依赖
+
+```bash
+git clone https://github.com/meme-lau/weatherkit-proxy.git
+cd weatherkit-proxy
+npm install
+```
+
+##### 3. 登录并一键部署
+
+```bash
+# 登录您的 Vercel 账号
+npx vercel login
+
+# 部署服务
+npm run deploy:vercel
+```
 
 ---
 
