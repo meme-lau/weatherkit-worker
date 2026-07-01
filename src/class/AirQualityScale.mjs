@@ -721,7 +721,7 @@ export default class AirQualityScale {
      * @returns {{ status: number, headers: Record<string, string>, body: string } | null}
      */
     static buildScale(language, scaleName) {
-        Console.info("☑️ AirQualityScale.buildScale", `language: ${language}`, `scaleName: ${scaleName}`);
+        Console.debug("☑️ AirQualityScale.buildScale", `language: ${language}`, `scaleName: ${scaleName}`);
 
         const scaleBaseName = scaleName?.split(".")?.[0];
         Console.debug(`scaleBaseName: ${scaleBaseName}`);
@@ -754,7 +754,7 @@ export default class AirQualityScale {
                 break;
         }
 
-        Console.info("✅ AirQualityScale.buildScale", result ? "已构建本地响应" : "透传");
+        Console.debug("✅ AirQualityScale.buildScale", result ? "已构建本地响应" : "透传");
         return result;
     }
 

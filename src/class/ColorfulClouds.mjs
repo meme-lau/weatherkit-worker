@@ -111,7 +111,7 @@ export default class ColorfulClouds {
     };
 
     async #RealTime() {
-        Console.info("☑️ RealTime");
+        Console.debug("☑️ RealTime");
 
         if (!this.#cache.realtimePromise) {
             const request = {
@@ -132,13 +132,13 @@ export default class ColorfulClouds {
                     return {};
                 });
         } else {
-            Console.info("✅ RealTime", "Using cache promise");
+            Console.debug("✅ RealTime", "Using cache promise");
         }
         return this.#cache.realtimePromise;
     }
 
     async Minutely() {
-        Console.info("☑️ Minutely");
+        Console.debug("☑️ Minutely");
         // 判断可用性：当前数据源不支持这个国家/地区
         if (!this.#Config.Availability.Minutely.includes(this.country)) {
             Console.warn("Minutely", `Unsupported country: ${this.country}`);
@@ -215,13 +215,13 @@ export default class ColorfulClouds {
             Console.error(`Minutely: ${error}`);
         } finally {
             //Console.debug(`forecastNextHour: ${JSON.stringify(forecastNextHour, null, 2)}`);
-            Console.info("✅ Minutely");
+            Console.debug("✅ Minutely");
         }
         return forecastNextHour;
     }
 
     async #Hourly(hourlysteps = 273, begin = undefined) {
-        Console.info("☑️ Hourly", `hourlysteps: ${hourlysteps}`, `begin: ${begin}`);
+        Console.debug("☑️ Hourly", `hourlysteps: ${hourlysteps}`, `begin: ${begin}`);
         const request = {
             url: `${this.endpoint}/hourly?hourlysteps=${hourlysteps}`,
             headers: this.headers,
@@ -233,7 +233,7 @@ export default class ColorfulClouds {
                 case "ok":
                     switch (body?.result?.hourly?.status) {
                         case "ok": {
-                            Console.info("✅ Hourly");
+                            Console.debug("✅ Hourly");
                             return body;
                         }
                         case "error":
@@ -250,13 +250,13 @@ export default class ColorfulClouds {
             Console.error(`Hourly: ${error}`);
         } finally {
             //Console.debug(`airQuality: ${JSON.stringify(this.airQuality, null, 2)}`);
-            Console.info("✅ Hourly");
+            Console.debug("✅ Hourly");
         }
         return {};
     }
 
     async Daily(dailysteps = 10, begin = undefined) {
-        Console.info("☑️ Daily");
+        Console.debug("☑️ Daily");
         const request = {
             url: `${this.endpoint}/daily?dailysteps=${dailysteps}`,
             headers: this.headers,
@@ -389,7 +389,7 @@ export default class ColorfulClouds {
             Console.error(`Daily: ${error}`);
         } finally {
             //Console.debug(`Daily: ${JSON.stringify(Daily, null, 2)}`);
-            Console.info("✅ Daily");
+            Console.debug("✅ Daily");
         }
         return forecastDaily;
     }
@@ -418,7 +418,7 @@ export default class ColorfulClouds {
      * @returns {Object} 修复后的污染物对象
      */
     #CreatePollutants(pollutantsObj = {}, scale = "") {
-        Console.info("☑️ CreatePollutants");
+        Console.debug("☑️ CreatePollutants");
         const { mgm3, ugm3 } = AirQuality.Config.Units.WeatherKit;
         const pollutants = Object.entries(pollutantsObj)
             .map(([name, amount]) => {
@@ -449,7 +449,7 @@ export default class ColorfulClouds {
             })
             .filter(Boolean);
 
-        Console.info("✅ CreatePollutants");
+        Console.debug("✅ CreatePollutants");
         return pollutants;
     }
 
@@ -485,7 +485,7 @@ export default class ColorfulClouds {
      * 成功时返回完整空气质量对象；不可用时返回 temporarilyUnavailable 的降级对象。
      */
     async CurrentAirQuality(useUsa = true, forcePrimaryPollutant = true) {
-        Console.info("☑️ CurrentAirQuality");
+        Console.debug("☑️ CurrentAirQuality");
         // 统一失败兜底对象，任一关键步骤失败时直接返回。
         const failedAirQuality = {
             metadata: this.#Metadata(undefined, undefined, true),
@@ -535,7 +535,7 @@ export default class ColorfulClouds {
                 primaryPollutant: "NOT_AVAILABLE",
                 scale: AirQuality.ToWeatherKitScale(scale.weatherKitScale),
             };
-            Console.info("✅ CurrentAirQuality");
+            Console.debug("✅ CurrentAirQuality");
             return airQuality;
         } else {
             // CN 口径：使用 chn AQI，并基于分污染物 IAQI 判定主污染物。
@@ -558,13 +558,13 @@ export default class ColorfulClouds {
                 primaryPollutant: isNotAvailable ? "NOT_AVAILABLE" : primaryPollutant.pollutantType,
                 scale: AirQuality.ToWeatherKitScale(scale.weatherKitScale),
             };
-            Console.info("✅ CurrentAirQuality");
+            Console.debug("✅ CurrentAirQuality");
             return airQuality;
         }
     }
 
     async CurrentWeather() {
-        Console.info("☑️ CurrentWeather");
+        Console.debug("☑️ CurrentWeather");
         const realtime = await this.#RealTime();
         if (!realtime.result) {
             Console.error("CurrentWeather", "无法获取realtime数");
@@ -573,7 +573,7 @@ export default class ColorfulClouds {
             };
         }
 
-        Console.info("✅ CurrentWeather");
+        Console.debug("✅ CurrentWeather");
         return {
             metadata: this.#Metadata(realtime.result.server_time, realtime.location),
             cloudCover: Math.round(realtime.result.realtime.cloudrate * 100),
@@ -596,15 +596,15 @@ export default class ColorfulClouds {
      * @returns {Promise<object>} 昨日小时数据 Promise
      */
     async prefetchYesterdayHourly() {
-        Console.info("☑️ prefetchYesterdayHourly");
+        Console.debug("☑️ prefetchYesterdayHourly");
         this.#cache.yesterdayHourly = this.#Hourly(1, Math.trunc((Date.now() - 864e5) / 1000));
         const result = await this.#cache.yesterdayHourly;
-        Console.info("✅ prefetchYesterdayHourly");
+        Console.debug("✅ prefetchYesterdayHourly");
         return result;
     }
 
     async YesterdayAirQuality(useUsa = true) {
-        Console.info("☑️ YesterdayAirQuality");
+        Console.debug("☑️ YesterdayAirQuality");
 
         const yesterdayHourly = await (this.#cache.yesterdayHourly ?? this.#Hourly(1, Math.trunc((Date.now() - 864e5) / 1000)));
         const scale = useUsa ? AirQuality.Config.Scales.EPA_NowCast : AirQuality.Config.Scales.HJ6332012;
@@ -634,7 +634,7 @@ export default class ColorfulClouds {
         const isSignificant = categoryIndex >= scale.categories.significantIndex;
         Console.debug(`index: ${index}`);
 
-        Console.info("✅ YesterdayAirQuality", `categoryIndex: ${categoryIndex}`);
+        Console.debug("✅ YesterdayAirQuality", `categoryIndex: ${categoryIndex}`);
         return {
             ...particularAirQuality,
             index,
@@ -645,7 +645,7 @@ export default class ColorfulClouds {
     }
 
     async ForecastHourly(hourlysteps, begin) {
-        Console.info("☑️ ForecastHourly");
+        Console.debug("☑️ ForecastHourly");
         const hourly = await this.#Hourly(hourlysteps, begin);
         if (!hourly.result) {
             Console.error("ForecastHourly", "Failed to get hourly data");
@@ -654,7 +654,7 @@ export default class ColorfulClouds {
             };
         }
 
-        Console.info("✅ ForecastHourly");
+        Console.debug("✅ ForecastHourly");
         return {
             metadata: this.#Metadata(hourly.result.server_time, hourly.location),
             hours: Array.from({ length: hourly.result.hourly.skycon.length }, (_, i) => ({

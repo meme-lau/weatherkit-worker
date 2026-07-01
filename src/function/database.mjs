@@ -20,7 +20,7 @@ export default {
         },
     },
     Default: {
-        Settings: { LogLevel: "WARN" },
+        Settings: { LogLevel: "INFO" },
         Configs: {
             Storefront: {
                 AE: "143481",

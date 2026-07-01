@@ -78,28 +78,28 @@ export default class ForecastNextHour {
     };
 
     static WeatherCondition(sentence) {
-        Console.info("☑️ WeatherCondition", `sentence: ${sentence}`);
+        Console.debug("☑️ WeatherCondition", `sentence: ${sentence}`);
         let weatherCondition = "CLEAR";
         Object.keys(ForecastNextHour.#Configs.WeatherCondition).forEach(key => {
             if (sentence.includes(key)) weatherCondition = ForecastNextHour.#Configs.WeatherCondition[key];
         });
-        Console.info(`✅ WeatherCondition: ${weatherCondition}`);
+        Console.debug(`✅ WeatherCondition: ${weatherCondition}`);
         return weatherCondition;
     }
 
     // 根据描述文本猜测降水类型
     static PrecipitationType(sentence) {
-        Console.info("☑️ PrecipitationType", `sentence: ${sentence}`);
+        Console.debug("☑️ PrecipitationType", `sentence: ${sentence}`);
         let precipitationType = "CLEAR";
         Object.keys(ForecastNextHour.#Configs.PrecipitationType).forEach(key => {
             if (sentence.includes(key)) precipitationType = ForecastNextHour.#Configs.PrecipitationType[key];
         });
-        Console.info(`✅ PrecipitationType: ${precipitationType}`);
+        Console.debug(`✅ PrecipitationType: ${precipitationType}`);
         return precipitationType;
     }
 
     static Minute(minutes = [], description = "", units = "mmph") {
-        Console.info("☑️ Minute");
+        Console.debug("☑️ Minute");
         const precipitationType = ForecastNextHour.PrecipitationType(description);
         // refer: https://docs.caiyunapp.com/weather-api/v2/v2.6/tables/precip.html
 
@@ -179,12 +179,12 @@ export default class ForecastNextHour {
             return minute;
         });
 
-        Console.info("✅ Minute");
+        Console.debug("✅ Minute");
         return minutes;
     }
 
     static Summary(minutes = []) {
-        Console.info("☑️ Summary");
+        Console.debug("☑️ Summary");
         const Summaries = [];
         let Summary = {
             condition: "CLEAR",
@@ -281,12 +281,12 @@ export default class ForecastNextHour {
             }
         }
         Console.debug(`Summaries: ${JSON.stringify(Summaries, null, 2)}`);
-        Console.info("✅ Summary");
+        Console.debug("✅ Summary");
         return Summaries;
     }
 
     static Condition(summaries = []) {
-        Console.info("☑️ Condition");
+        Console.debug("☑️ Condition");
         const Conditions = [];
         if (summaries.length > 4) {
             summaries = summaries.slice(0, 4);
@@ -573,12 +573,12 @@ export default class ForecastNextHour {
             }
         }
         Console.debug(`Conditions: ${JSON.stringify(Conditions, null, 2)}`);
-        Console.info("✅ Condition");
+        Console.debug("✅ Condition");
         return Conditions;
     }
 
     static #ConvertPrecipitationIntensity(precipitationIntensity, units = "mmph") {
-        //Console.info("☑️ ConvertPrecipitationIntensity");
+        //Console.debug("☑️ ConvertPrecipitationIntensity");
         //Console.debug(`precipitationIntensity: ${precipitationIntensity}`, `units: ${units}`);
         const Range = ForecastNextHour.#Configs.Precipitation.Range[units];
         let perceivedPrecipitationIntensity = 0;
@@ -607,7 +607,7 @@ export default class ForecastNextHour {
         perceivedPrecipitationIntensity = Math.trunc(perceivedPrecipitationIntensity * 1000) / 1000;
 
         //Console.debug(`perceivedPrecipitationIntensity: ${perceivedPrecipitationIntensity}`);
-        //Console.info(`✅ ConvertPrecipitationIntensity`);
+        //Console.debug(`✅ ConvertPrecipitationIntensity`);
         return perceivedPrecipitationIntensity;
     }
 }

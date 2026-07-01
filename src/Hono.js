@@ -6,7 +6,7 @@ import configs from "./function/configs.mjs";
 import database from "./function/database.mjs";
 import { renderIndex } from "./function/indexPage.mjs";
 import parseWeatherKitURL from "./function/parseWeatherKitURL.mjs";
-import setENV from "./function/setENV.mjs";
+import buildSettings from "./function/buildSettings.mjs";
 import { Response } from "./process/Response.mjs";
 import { Lodash as _, fetch, requestContext } from "./utils/index.mjs";
 
@@ -109,7 +109,7 @@ async function handleWeatherRequest(c, queryArguments = {}) {
         _.merge(finalArguments, queryArguments, urlArguments);
 
         // 提前解析 URL 参数，用于并发预取第三方数据
-        const { Settings, Caches, Configs } = setENV("iRingo", "WeatherKit", database, finalArguments);
+        const { Settings, Configs } = buildSettings(database, finalArguments);
         store.Settings = Settings;
         const parameters = parseWeatherKitURL(url);
         const enviroments = {
@@ -173,10 +173,8 @@ async function handleWeatherRequest(c, queryArguments = {}) {
                 if (comparisonProvider === "ColorfulCloudsCN" || comparisonProvider === "ColorfulCloudsUS") {
                     preFetched.yesterdayHourly = enviroments.colorfulClouds.prefetchYesterdayHourly().catch(() => undefined);
                 } else if (comparisonProvider === "QWeather") {
-                    const setQWeatherCache = qweatherCache => {
-                        Caches.qweather = qweatherCache;
-                    };
-                    const locationsGrid = await QWeather.GetLocationsGrid(Caches?.qweather, setQWeatherCache);
+                    const locationsGrid = await QWeather.GetLocationsGrid(undefined, () => {});
+                    preFetched.locationsGrid = locationsGrid;
                     const locationInfo = QWeather.GetLocationInfo(locationsGrid, parameters.latitude, parameters.longitude);
                     preFetched.yesterdayHourly = enviroments.qWeather.prefetchYesterdayAirQuality(locationInfo).catch(() => undefined);
                 }
@@ -190,7 +188,7 @@ async function handleWeatherRequest(c, queryArguments = {}) {
         /* todo */
         // globalThis.$arguments = url.searchParams.get("Weather_Provider");
 
-        $response = await Response($request, $response, { preFetched, enviroments, parameters, Settings, Caches, Configs });
+        $response = await Response($request, $response, { preFetched, enviroments, parameters, Settings, Configs });
         return HonoWorkerAdapter.writeResponse(c, $response);
     });
 }

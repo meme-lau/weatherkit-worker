@@ -5,7 +5,7 @@ export default class WeatherKit2 {
     static Name = "WeatherKit2";
     static Version = "1.2.1";
     static encode(builder, dataSet = "all", data = {}) {
-        Console.info("☑️ WeatherKit2.encode", `dataSet: ${dataSet}`);
+        Console.debug("☑️ WeatherKit2.encode", `dataSet: ${dataSet}`);
         let offset;
         let metadataOffset;
         if (data?.metadata)
@@ -450,12 +450,12 @@ export default class WeatherKit2 {
                 offset = WK2.LocationInfo.createLocationInfo(builder, metadataOffset, builder.createString(data?.preciseName), builder.createString(data?.countryCode), builder.createString(data?.timeZone), builder.createString(data?.primaryName));
                 break;
         }
-        Console.info("✅ WeatherKit2.encode", `dataSet: ${dataSet}`);
+        Console.debug("✅ WeatherKit2.encode", `dataSet: ${dataSet}`);
         return offset;
     }
 
     static decode(byteBuffer, dataSet = "all", data = {}) {
-        Console.info("☑️ WeatherKit2.decode", `dataSet: ${dataSet}`);
+        Console.debug("☑️ WeatherKit2.decode", `dataSet: ${dataSet}`);
         const Weather = WK2.Weather.getRootAsWeather(byteBuffer);
         const AirQualityData = Weather?.airQuality();
         const CurrentWeatherData = Weather?.currentWeather();
@@ -1031,7 +1031,7 @@ export default class WeatherKit2 {
                     timeZone: LocationInfoData?.timeZone(),
                 };
         }
-        Console.info("✅ WeatherKit2.decode", `dataSet: ${dataSet}`);
+        Console.debug("✅ WeatherKit2.decode", `dataSet: ${dataSet}`);
         return data;
     }
 

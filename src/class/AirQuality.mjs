@@ -40,7 +40,7 @@ export default class AirQuality {
      */
 
     static CategoryIndex(index, categories) {
-        Console.info("☑️ CategoryIndex", `index: ${index}`);
+        Console.debug("☑️ CategoryIndex", `index: ${index}`);
 
         const failedCategoryIndex = -1;
 
@@ -59,12 +59,12 @@ export default class AirQuality {
             return failedCategoryIndex;
         }
 
-        Console.info("✅ CategoryIndex", `categoryIndex: ${range.categoryIndex}`);
+        Console.debug("✅ CategoryIndex", `categoryIndex: ${range.categoryIndex}`);
         return range.categoryIndex;
     }
 
     static CompareCategoryIndexes(todayCategoryIndex, yesterdayCategoryIndex) {
-        Console.info("☑️ CompareCategoryIndexes", `todayCategoryIndex: ${todayCategoryIndex}`, `yesterdayCategoryIndex: ${yesterdayCategoryIndex}`);
+        Console.debug("☑️ CompareCategoryIndexes", `todayCategoryIndex: ${todayCategoryIndex}`, `yesterdayCategoryIndex: ${yesterdayCategoryIndex}`);
 
         const { UNKNOWN, SAME, WORSE, BETTER } = AirQuality.Config.CompareCategoryIndexes;
         const diff = Number(todayCategoryIndex) - Number(yesterdayCategoryIndex);
@@ -74,20 +74,20 @@ export default class AirQuality {
             return UNKNOWN;
         } else {
             if (diff === 0) {
-                Console.info("✅ CompareCategoryIndexes");
+                Console.debug("✅ CompareCategoryIndexes");
                 return SAME;
             } else if (diff > 0) {
-                Console.info("✅ CompareCategoryIndexes");
+                Console.debug("✅ CompareCategoryIndexes");
                 return WORSE;
             } else {
-                Console.info("✅ CompareCategoryIndexes");
+                Console.debug("✅ CompareCategoryIndexes");
                 return BETTER;
             }
         }
     }
 
     static ConvertUnits(pollutants, stpConversionFactors, pollutantScales) {
-        Console.info("☑️ ConvertUnits");
+        Console.debug("☑️ ConvertUnits");
 
         const friendlyUnits = AirQuality.Config.Units.Friendly;
 
@@ -95,11 +95,11 @@ export default class AirQuality {
             const pollutantScale = pollutantScales[pollutant.pollutantType];
 
             if (!pollutantScale) {
-                Console.info("ConvertUnits", `No scale for ${pollutant.pollutantType}, skip`);
+                Console.debug("ConvertUnits", `No scale for ${pollutant.pollutantType}, skip`);
                 return pollutant;
             }
 
-            Console.info("ConvertUnits", `Converting ${pollutant.pollutantType}`);
+            Console.debug("ConvertUnits", `Converting ${pollutant.pollutantType}`);
             const amount = AirQuality.ConvertUnit(pollutant.amount, pollutant.units, pollutantScale.units, stpConversionFactors?.[pollutant.pollutantType] || -1, pollutantScale?.stpConversionFactor || -1);
             if (amount < 0) {
                 Console.error(
@@ -110,10 +110,10 @@ export default class AirQuality {
                 return pollutant;
             }
 
-            Console.info("ConvertUnits", `Converted ${pollutant.pollutantType}: ${amount} ${friendlyUnits[pollutantScale.units] ?? pollutantScale.units}`);
+            Console.debug("ConvertUnits", `Converted ${pollutant.pollutantType}: ${amount} ${friendlyUnits[pollutantScale.units] ?? pollutantScale.units}`);
             return { ...pollutant, amount, units: pollutantScale.units };
         });
-        Console.info("✅ ConvertUnits");
+        Console.debug("✅ ConvertUnits");
         return convertedPollutants;
     }
 
@@ -130,7 +130,7 @@ export default class AirQuality {
      * @returns {any} 单位修复后的空气质量数据对象
      */
     static FixPollutantsUnits(airQuality) {
-        Console.info("☑️ FixPollutantsUnits");
+        Console.debug("☑️ FixPollutantsUnits");
         switch (airQuality?.metadata?.providerName) {
             case "和风天气":
             case "QWeather": {
@@ -153,25 +153,25 @@ export default class AirQuality {
                 break;
             }
         }
-        Console.info("✅ FixPollutantsUnits");
+        Console.debug("✅ FixPollutantsUnits");
         return airQuality;
     }
 
     static #GetStpConversionFactors(airQuality) {
-        Console.info("☑️ GetStpConversionFactors");
+        Console.debug("☑️ GetStpConversionFactors");
 
         switch (airQuality?.metadata?.providerName) {
             case "和风天气":
             case "BreezoMeter":
             default: {
-                Console.info("✅ GetStpConversionFactors", `STP conversion factors for ${airQuality?.metadata?.providerName}: US`);
+                Console.debug("✅ GetStpConversionFactors", `STP conversion factors for ${airQuality?.metadata?.providerName}: US`);
                 return AirQuality.Config.STP_ConversionFactors.US;
             }
         }
     }
 
     static Pollutants2AQI(airQuality, Settings, options = {}) {
-        Console.info("☑️ Pollutants2AQI");
+        Console.debug("☑️ Pollutants2AQI");
         const algorithm = options?.algorithm ?? Settings?.AirQuality?.Calculate?.Algorithm;
         const forcePrimaryPollutant = options?.forcePrimaryPollutant ?? Settings?.AirQuality?.Current?.Index?.ForceCNPrimaryPollutants;
         const allowOverRange = options?.allowOverRange ?? Settings?.AirQuality?.Calculate?.AllowOverRange;
@@ -185,22 +185,22 @@ export default class AirQuality {
             }
             case "EU_EAQI": {
                 // PollutantsToEAQI
-                Console.info("☑️ PollutantsToEAQI");
+                Console.debug("☑️ PollutantsToEAQI");
                 airQuality = AirQuality.#PollutantsToAirQuality(airQuality.pollutants, scale, { stpConversionFactors, allowOverRange: false });
-                Console.info("✅ PollutantsToEAQI");
+                Console.debug("✅ PollutantsToEAQI");
                 break;
             }
             case "WAQI_InstantCast_US": {
                 // PollutantsToInstantCastUS
-                Console.info("☑️ PollutantsToInstantCastUS", `allowOverRange: ${allowOverRange}`);
+                Console.debug("☑️ PollutantsToInstantCastUS", `allowOverRange: ${allowOverRange}`);
                 airQuality = AirQuality.#PollutantsToAirQuality(airQuality.pollutants, scale, { stpConversionFactors, allowOverRange });
-                Console.info("✅ PollutantsToInstantCastUS");
+                Console.debug("✅ PollutantsToInstantCastUS");
                 break;
             }
             case "WAQI_InstantCast_CN":
             case "WAQI_InstantCast_CN_25_DRAFT": {
                 // PollutantsToInstantCastCN12 / PollutantsToInstantCastCN25 / #PollutantsToInstantCastCN
-                Console.info("☑️ PollutantsToInstantCastCN", `allowOverRange: ${allowOverRange}`, `forcePrimaryPollutant: ${forcePrimaryPollutant}`);
+                Console.debug("☑️ PollutantsToInstantCastCN", `allowOverRange: ${allowOverRange}`, `forcePrimaryPollutant: ${forcePrimaryPollutant}`);
                 airQuality = AirQuality.#PollutantsToAirQuality(airQuality.pollutants, scale, { stpConversionFactors, allowOverRange });
 
                 const isNotAvailable = !forcePrimaryPollutant && airQuality.index <= 50;
@@ -212,30 +212,30 @@ export default class AirQuality {
                     ...airQuality,
                     primaryPollutant: isNotAvailable ? "NOT_AVAILABLE" : airQuality.primaryPollutant,
                 };
-                Console.info("✅ PollutantsToInstantCastCN");
+                Console.debug("✅ PollutantsToInstantCastCN");
                 break;
             }
             case "UBA":
             default: {
                 // PollutantsToUBA
-                Console.info("☑️ PollutantsToUBA");
+                Console.debug("☑️ PollutantsToUBA");
                 airQuality = AirQuality.#PollutantsToAirQuality(airQuality.pollutants, scale, { stpConversionFactors, allowOverRange: true });
                 airQuality = {
                     ...airQuality,
                     index: airQuality.categoryIndex,
                 };
-                Console.info("✅ PollutantsToUBA");
+                Console.debug("✅ PollutantsToUBA");
                 break;
             }
         }
 
-        Console.info("✅ Pollutants2AQI");
+        Console.debug("✅ Pollutants2AQI");
         return airQuality;
     }
 
     static ConvertPollutants(airQuality, injectedPollutants, needInjectIndex, injectedIndex, Settings) {
         const unitsMode = Settings?.AirQuality?.Current?.Pollutants?.Units?.Mode || "Scale";
-        Console.info("☑️ ConvertPollutants", `mode: ${unitsMode}`);
+        Console.debug("☑️ ConvertPollutants", `mode: ${unitsMode}`);
 
         const getScale = scaleName => {
             const scales = AirQuality.Config.Scales;
@@ -306,7 +306,7 @@ export default class AirQuality {
         const scaleName = AirQuality.GetNameFromScale(isIndexInjected ? injectedIndex?.scale : airQuality?.scale);
 
         const pollutants = injectedPollutants?.metadata && !injectedPollutants.metadata.temporarilyUnavailable ? injectedPollutants.pollutants : airQuality?.pollutants;
-        Console.info("✅ ConvertPollutants");
+        Console.debug("✅ ConvertPollutants");
         if (replaceUnits.includes(scaleName)) {
             if (isIndexInjected && Settings?.AirQuality?.Current?.Index?.Provider === "Calculate" && unitsMode === "Scale") {
                 Console.info("ConvertPollutants", `Use pollutants from iRingo`);
@@ -328,7 +328,7 @@ export default class AirQuality {
     static ToWeatherKitScale = ({ name, version }) => `${name}.${version}`;
     static GetNameFromScale(scale) {
         if (!scale) return "";
-        Console.info("☑️ GetNameFromScale", `scale: ${scale}`);
+        Console.debug("☑️ GetNameFromScale", `scale: ${scale}`);
 
         const lastDotIndex = scale.lastIndexOf(".");
         if (lastDotIndex === -1) {
@@ -337,7 +337,7 @@ export default class AirQuality {
         }
 
         const scaleName = scale.substring(0, lastDotIndex);
-        Console.info("✅ GetNameFromScale", `scaleName: ${scaleName}`);
+        Console.debug("✅ GetNameFromScale", `scaleName: ${scaleName}`);
         return scaleName;
     }
 
@@ -351,16 +351,16 @@ export default class AirQuality {
      * @returns {string} 选中的算法名；无法匹配时返回空字符串
      */
     static chooseAlogrithm(airQuality, Settings) {
-        Console.info("☑️ chooseAlogrithm", `currentIndexProvider: ${Settings?.AirQuality?.Comparison?.Yesterday?.IndexProvider}`);
+        Console.debug("☑️ chooseAlogrithm", `currentIndexProvider: ${Settings?.AirQuality?.Comparison?.Yesterday?.IndexProvider}`);
 
         switch (Settings?.AirQuality?.Comparison?.Yesterday?.IndexProvider) {
             case "Calculate": {
-                Console.info("✅ chooseAlogrithm", `algorithm: ${Settings?.AirQuality?.Calculate?.Algorithm}`);
+                Console.debug("✅ chooseAlogrithm", `algorithm: ${Settings?.AirQuality?.Calculate?.Algorithm}`);
                 return Settings?.AirQuality?.Calculate?.Algorithm;
             }
             case "QWeather":
             case "ColorfulCloudsCN": {
-                Console.info("✅ chooseAlogrithm", `algorithm: WAQI_InstantCast_CN`);
+                Console.debug("✅ chooseAlogrithm", `algorithm: WAQI_InstantCast_CN`);
                 return "WAQI_InstantCast_CN";
             }
             case "WeatherKit": {
@@ -368,15 +368,15 @@ export default class AirQuality {
                 const scales = AirQuality.Config.Scales;
 
                 if (currentScale === scales.HJ6332012.weatherKitScale.name) {
-                    Console.info("✅ chooseAlogrithm", `algorithm: WAQI_InstantCast_CN`);
+                    Console.debug("✅ chooseAlogrithm", `algorithm: WAQI_InstantCast_CN`);
                     return "WAQI_InstantCast_CN";
                 } else if (currentScale === scales.EPA_NowCast.weatherKitScale.name) {
-                    Console.info("✅ chooseAlogrithm", `algorithm: WAQI_InstantCast_US`);
+                    Console.debug("✅ chooseAlogrithm", `algorithm: WAQI_InstantCast_US`);
                     return "WAQI_InstantCast_US";
                 } else {
                     const supportedScales = [scales.EU_EAQI.weatherKitScale.name, scales.UBA.weatherKitScale.name];
                     if (supportedScales.includes(currentScale)) {
-                        Console.info("✅ chooseAlogrithm", `algorithm: ${currentScale}`);
+                        Console.debug("✅ chooseAlogrithm", `algorithm: ${currentScale}`);
                         return currentScale;
                     }
 
@@ -536,7 +536,7 @@ export default class AirQuality {
     }
 
     static PrimaryPollutant(pollutants, categories) {
-        Console.info("☑️ PrimaryPollutant");
+        Console.debug("☑️ PrimaryPollutant");
         const failedPollutant = { pollutantType: "NOT_AVAILABLE", index: -1, categoryIndex: -1 };
 
         if (!Array.isArray(pollutants) || pollutants.length === 0) {
@@ -568,7 +568,7 @@ export default class AirQuality {
         }
 
         const primaryPollutant = primaryPollutants[0];
-        Console.info("✅ PrimaryPollutant", "primaryPollutant:", primaryPollutant);
+        Console.debug("✅ PrimaryPollutant", "primaryPollutant:", primaryPollutant);
         return primaryPollutant;
     }
 
@@ -613,7 +613,7 @@ export default class AirQuality {
      * 返回标准化 airQuality；当输入无效时返回 temporarilyUnavailable 结果。
      */
     static #PollutantsToAirQuality(pollutants, scale, options = {}) {
-        Console.info("☑️ PollutantsToAirQuality");
+        Console.debug("☑️ PollutantsToAirQuality");
         const stpConversionFactors = options?.stpConversionFactors;
         const allowOverRange = options?.allowOverRange ?? true;
 
@@ -634,7 +634,7 @@ export default class AirQuality {
         const primaryPollutant = AirQuality.PrimaryPollutant(newPollutants, scale.categories);
         const maxIndex = scale?.weatherKitScale?.maxIndex;
         const index = allowOverRange || !Number.isFinite(maxIndex) ? Math.round(primaryPollutant.index) : Math.min(Math.round(primaryPollutant.index), maxIndex);
-        Console.info("✅ PollutantsToAirQuality");
+        Console.debug("✅ PollutantsToAirQuality");
         return {
             index,
             isSignificant: primaryPollutant.categoryIndex >= scale.categories.significantIndex,
@@ -1899,17 +1899,17 @@ export default class AirQuality {
             case ppm:
                 switch (to) {
                     case ppm:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return numAmount;
                     case ppb:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(numAmount, 1000);
                     case mgm3:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(numAmount, fromStpConversionFactor);
                     case ugm3: {
                         const inPpb = AirQuality.ConvertUnit(numAmount, from, ppb);
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(inPpb, fromStpConversionFactor);
                     }
                     default:
@@ -1918,18 +1918,18 @@ export default class AirQuality {
             case ppb:
                 switch (to) {
                     case ppb:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return numAmount;
                     case ppm:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(numAmount, 0.001);
                     case mgm3: {
                         const inPpm = AirQuality.ConvertUnit(numAmount, from, ppm);
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(inPpm, fromStpConversionFactor);
                     }
                     case ugm3:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(numAmount, fromStpConversionFactor);
                     default:
                         return -1;
@@ -1937,17 +1937,17 @@ export default class AirQuality {
             case mgm3:
                 switch (to) {
                     case mgm3:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return numAmount;
                     case ugm3:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(numAmount, 1000);
                     case ppm:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return divide(numAmount, toStpConversionFactor);
                     case ppb: {
                         const inUgM3 = AirQuality.ConvertUnit(numAmount, from, ugm3);
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return divide(inUgM3, toStpConversionFactor);
                     }
                     default:
@@ -1956,18 +1956,18 @@ export default class AirQuality {
             case ugm3:
                 switch (to) {
                     case ugm3:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return numAmount;
                     case mgm3:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return multiply(numAmount, 0.001);
                     case ppm: {
                         const inMgM3 = AirQuality.ConvertUnit(numAmount, from, mgm3);
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return divide(inMgM3, toStpConversionFactor);
                     }
                     case ppb:
-                        Console.info("✅ ConvertUnit");
+                        Console.debug("✅ ConvertUnit");
                         return divide(numAmount, toStpConversionFactor);
                     default:
                         return -1;

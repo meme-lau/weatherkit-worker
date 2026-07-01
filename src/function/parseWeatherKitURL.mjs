@@ -1,7 +1,7 @@
 import { Console } from "../utils/index.mjs";
 
 export default function parseWeatherKitURL(url = new URL($request.url)) {
-    Console.info("☑️ parseWeatherKitURL");
+    Console.debug("☑️ parseWeatherKitURL");
     const WeatherKitRegExp = /^\/api\/(?<version>v1|v2|v3)\/(availability|weather)\/(?<language>\w+)(?:-\w+)?(-(?<country>[A-Z]{2}))?\/(?<latitude>-?\d+\.?\d*)\/(?<longitude>-?\d+\.?\d*)$/i;
     //const LanguageRegExp = /^(?<language>\w+(-\w+)?)-(?<country>[A-Z]{2})$/i;
     const Parameters = url?.pathname.match(WeatherKitRegExp)?.groups;

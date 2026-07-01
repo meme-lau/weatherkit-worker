@@ -12,10 +12,10 @@ export default class Weather {
      * @returns {number} UV Index（四舍五入为整数）
      */
     static ConvertDSWRF(dswrf, k = 0.04) {
-        Console.info("☑️ ConvertDSWRF");
+        Console.debug("☑️ ConvertDSWRF");
         const uvIndex = Math.round((Math.max(dswrf, 0) * k) / 0.025); // 估算 UV Index
         //Console.debug(`UV Index: ${uvIndex}`);
-        Console.info("✅ ConvertDSWRF");
+        Console.debug("✅ ConvertDSWRF");
         // 限制结果在 0~11，并四舍五入为整数
         return Math.min(uvIndex, 11);
     }

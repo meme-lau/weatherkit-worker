@@ -51,11 +51,11 @@ export default class QWeather {
     };
 
     static async GetLocationsGrid(qweatherCache, setCache) {
-        Console.info("☑️ GetLocationsGrid");
+        Console.debug("☑️ GetLocationsGrid");
         const locationsGrid = qweatherCache?.locationsGrid;
         // cache within 30 days
         if (locationsGrid?.lastUpdated && locationsGrid.lastUpdated + 30 * 24 * 60 * 60 * 1000 > Date.now()) {
-            Console.info("✅ GetLocationsGrid", "Cache found!");
+            Console.debug("✅ GetLocationsGrid", "Cache found!");
             return locationsGrid.data;
         }
 
@@ -67,7 +67,7 @@ export default class QWeather {
             });
 
             if (response.status === 304) {
-                Console.info("✅ GetLocationsGrid", "Cache not modified");
+                Console.debug("✅ GetLocationsGrid", "Cache not modified");
                 setCache({ ...qweatherCache, locationsGrid: { ...locationsGrid, lastUpdated: Date.now() } });
                 return locationsGrid.data;
             }
@@ -78,7 +78,7 @@ export default class QWeather {
                 ...qweatherCache,
                 locationsGrid: { etag, lastUpdated: Date.now(), data: newLocationsGrid },
             });
-            Console.info("✅ GetLocationsGrid");
+            Console.debug("✅ GetLocationsGrid");
             return newLocationsGrid;
         } catch (error) {
             Console.error("GetLocationsGrid error:", error);
@@ -88,7 +88,7 @@ export default class QWeather {
 
     // Codes by Claude AI
     static GetLocationInfo(locationsGrid, latitude, longitude) {
-        Console.info("☑️ GetLocationInfo");
+        Console.debug("☑️ GetLocationInfo");
 
         if (!locationsGrid) {
             Console.warn("GetLocationInfo", "No locationsGrid provided");
@@ -142,12 +142,12 @@ export default class QWeather {
         };
 
         const nearest = findNearestFast(latitude, longitude);
-        Console.info("✅ GetLocationInfo");
+        Console.debug("✅ GetLocationInfo");
         return nearest;
     }
 
     async GeoAPI(path = "city/lookup") {
-        Console.info("☑️ GeoAPI");
+        Console.debug("☑️ GeoAPI");
         const request = {
             url: `${this.endpoint}/geo/v2/${path}?location=${this.longitude},${this.latitude}`,
             headers: this.headers,
@@ -172,13 +172,13 @@ export default class QWeather {
             Console.error(`GeoAPI: ${error}`);
         } finally {
             Console.debug("metadata:", metadata);
-            Console.info("✅ GeoAPI");
+            Console.debug("✅ GeoAPI");
         }
         return metadata;
     }
 
     async WeatherNow() {
-        Console.info("☑️ WeatherNow");
+        Console.debug("☑️ WeatherNow");
         const request = {
             url: `${this.endpoint}/v7/weather/now?location=${this.longitude},${this.latitude}`,
             headers: this.headers,
@@ -232,13 +232,13 @@ export default class QWeather {
             Console.error(`WeatherNow: ${error}`);
         } finally {
             //Console.debug(`currentWeather: ${JSON.stringify(currentWeather, null, 2)}`);
-            Console.info("✅ WeatherNow");
+            Console.debug("✅ WeatherNow");
         }
         return currentWeather;
     }
 
     async #AirQualityCurrent() {
-        Console.info("☑️ AirQualityCurrent");
+        Console.debug("☑️ AirQualityCurrent");
 
         if (!this.#cache.airQualityCurrentPromise) {
             const request = {
@@ -259,13 +259,13 @@ export default class QWeather {
                     return {};
                 });
         } else {
-            Console.info("✅ AirQualityCurrent", "Using cache promise");
+            Console.debug("✅ AirQualityCurrent", "Using cache promise");
         }
         return this.#cache.airQualityCurrentPromise;
     }
 
     async Minutely() {
-        Console.info("☑️ Minutely");
+        Console.debug("☑️ Minutely");
         // 判断可用性：当前数据源不支持这个国家/地区
         if (!this.#Config.Availability.Minutely.includes(this.country)) {
             Console.warn("Minutely", `Unsupported country: ${this.country}`);
@@ -341,13 +341,13 @@ export default class QWeather {
             Console.error(`Minutely: ${error}`);
         } finally {
             //Console.debug(`forecastNextHour: ${JSON.stringify(forecastNextHour, null, 2)}`);
-            Console.info("✅ Minutely");
+            Console.debug("✅ Minutely");
         }
         return forecastNextHour;
     }
 
     async Hourly(hours = 168) {
-        Console.info("☑️ Hourly", `host: ${this.host}`);
+        Console.debug("☑️ Hourly", `host: ${this.host}`);
         const request = {
             url: `${this.endpoint}/v7/weather/${hours}h?location=${this.longitude},${this.latitude}`,
             headers: this.headers,
@@ -419,13 +419,13 @@ export default class QWeather {
             Console.error(`Hourly: ${error}`);
         } finally {
             //Console.debug(`airQuality: ${JSON.stringify(forecastHourly, null, 2)}`);
-            Console.info("✅ Hourly");
+            Console.debug("✅ Hourly");
         }
         return forecastHourly;
     }
 
     async Daily(days = 10) {
-        Console.info("☑️ Daily", `host: ${this.host}`);
+        Console.debug("☑️ Daily", `host: ${this.host}`);
         const request = {
             url: `${this.endpoint}/v7/weather/${days}d?location=${this.longitude},${this.latitude}`,
             headers: this.headers,
@@ -561,13 +561,13 @@ export default class QWeather {
             Console.error(`Daily: ${error}`);
         } finally {
             //Console.debug(`airQuality: ${JSON.stringify(forecastDaily, null, 2)}`);
-            Console.info("✅ Daily");
+            Console.debug("✅ Daily");
         }
         return forecastDaily;
     }
 
     async #HistoricalAir(locationID = new Number(), date = time("yyyyMMdd", Date.now() - 24 * 60 * 60 * 1000)) {
-        Console.info("☑️ HistoricalAir", `locationID: ${locationID}`, `date: ${date}`);
+        Console.debug("☑️ HistoricalAir", `locationID: ${locationID}`, `date: ${date}`);
         const request = {
             url: `${this.endpoint}/v7/historical/air/?location=${locationID}&date=${date}`,
             headers: this.headers,
@@ -593,7 +593,7 @@ export default class QWeather {
             Console.error(`HistoricalAir: ${error}`);
         } finally {
             //Console.debug(`airQuality: ${JSON.stringify(airQuality, null, 2)}`);
-            Console.info("✅ HistoricalAir");
+            Console.debug("✅ HistoricalAir");
         }
         return {};
     }
@@ -631,7 +631,7 @@ export default class QWeather {
      * }>} 转换后的污染物数组。
      */
     #CreatePollutants(pollutantsObj, scaleCode) {
-        Console.info("☑️ CreatePollutants");
+        Console.debug("☑️ CreatePollutants");
         Console.debug("pollutantsObj:", pollutantsObj);
 
         // TODO: what is ppmC? https://dev.qweather.com/docs/resource/air-info/#pollutants
@@ -656,7 +656,7 @@ export default class QWeather {
                 }
             });
 
-        Console.info("✅ CreatePollutants");
+        Console.debug("✅ CreatePollutants");
         return pollutants;
     }
 
@@ -667,7 +667,7 @@ export default class QWeather {
      * @returns {Array<{amount: number, pollutantType: string, units: string}>} 转换后的污染物数组。
      */
     #CreatePollutantsV7(pollutantsObj) {
-        Console.info("☑️ CreatePollutantsV7");
+        Console.debug("☑️ CreatePollutantsV7");
         Console.debug("pollutantsObj:", pollutantsObj);
 
         const { mgm3, ugm3 } = AirQuality.Config.Units.WeatherKit;
@@ -699,7 +699,7 @@ export default class QWeather {
             })
             .filter(Boolean);
 
-        Console.info("✅ CreatePollutantsV7");
+        Console.debug("✅ CreatePollutantsV7");
         return pollutants;
     }
 
@@ -715,12 +715,12 @@ export default class QWeather {
         }
 
         const findSupportedIndex = indexes => {
-            Console.info("☑️ findSupportedIndex");
+            Console.debug("☑️ findSupportedIndex");
 
             const supportedCodes = ["cn-mee", "cn-mee-1h", "eu-eea", "us-epa", "us-epa-nc"];
             for (const index of indexes) {
                 if (supportedCodes.includes(index.code)) {
-                    Console.info("✅ indexCodeToScale", `index.code: ${index.code}`);
+                    Console.debug("✅ indexCodeToScale", `index.code: ${index.code}`);
                     return index;
                 }
             }
@@ -729,21 +729,21 @@ export default class QWeather {
         };
 
         const indexCodeToScale = code => {
-            Console.info("☑️ indexCodeToScale", `code: ${code}`);
+            Console.debug("☑️ indexCodeToScale", `code: ${code}`);
 
             const { HJ6332012, EPA_NowCast, EU_EAQI } = AirQuality.Config.Scales;
             switch (code) {
                 // We don't need calcualtion so they are same
                 case "cn-mee":
                 case "cn-mee-1h":
-                    Console.info("✅ indexCodeToScale", "HJ6332012");
+                    Console.debug("✅ indexCodeToScale", "HJ6332012");
                     return HJ6332012;
                 case "us-epa":
                 case "us-epa-nc":
-                    Console.info("✅ indexCodeToScale", "EPA_NowCast");
+                    Console.debug("✅ indexCodeToScale", "EPA_NowCast");
                     return EPA_NowCast;
                 case "eu-eea":
-                    Console.info("✅ indexCodeToScale", "EU_EAQI");
+                    Console.debug("✅ indexCodeToScale", "EU_EAQI");
                     return EU_EAQI;
                 default:
                     Console.error("indexCodeToScale", "不支持的code");
@@ -751,7 +751,7 @@ export default class QWeather {
             }
         };
 
-        Console.info("☑️ CurrentAirQuality");
+        Console.debug("☑️ CurrentAirQuality");
         const airQualityCurrent = await this.#AirQualityCurrent();
         if (!Array.isArray(airQualityCurrent.pollutants)) {
             Console.error("AirQuality", "Failed to get current air quality data.");
@@ -821,16 +821,16 @@ export default class QWeather {
             if (!isNotAvailable) airQuality.primaryPollutant = calculatedPrimaryPollutant.pollutantType;
         }
 
-        Console.info("✅ CurrentAirQuality");
+        Console.debug("✅ CurrentAirQuality");
         return airQuality;
     }
 
     async prefetchYesterdayAirQuality(locationInfo) {
-        Console.info("☑️ prefetchYesterdayAirQuality");
+        Console.debug("☑️ prefetchYesterdayAirQuality");
         if (locationInfo && locationInfo.id && locationInfo.id.length === 9) {
             this.#cache.historicalAir = this.#HistoricalAir(locationInfo.id);
             const result = await this.#cache.historicalAir;
-            Console.info("✅ prefetchYesterdayAirQuality");
+            Console.debug("✅ prefetchYesterdayAirQuality");
             return result;
         }
         Console.warn("prefetchYesterdayAirQuality", "Invalid locationInfo");
@@ -838,7 +838,7 @@ export default class QWeather {
     }
 
     async YesterdayAirQuality(locationInfo) {
-        Console.info("☑️ YesterdayAirQuality", "locationInfo:", locationInfo);
+        Console.debug("☑️ YesterdayAirQuality", "locationInfo:", locationInfo);
         const failedAirQuality = {
             metadata: this.#Metadata(undefined, undefined, true),
             categoryIndex: -1,
@@ -869,7 +869,7 @@ export default class QWeather {
         const pollutants = this.#CreatePollutantsV7(historicalAir.airHourly[hour]);
         Console.debug(`hour: ${hour}`, `index: ${index}`);
 
-        Console.info("✅ YesterdayAirQuality", "pollutants:", pollutants, "categoryIndex:", categoryIndex);
+        Console.debug("✅ YesterdayAirQuality", "pollutants:", pollutants, "categoryIndex:", categoryIndex);
         return {
             metadata: this.#Metadata(historicalAir.fxLink),
             categoryIndex,

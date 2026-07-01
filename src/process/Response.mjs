@@ -7,12 +7,12 @@ import Weather from "../class/Weather.mjs";
 import WeatherKit2 from "../class/WeatherKit2.mjs";
 import database from "../function/database.mjs";
 import parseWeatherKitURL from "../function/parseWeatherKitURL.mjs";
-import setENV from "../function/setENV.mjs";
-import { Console, Storage } from "../utils/index.mjs";
+import buildSettings from "../function/buildSettings.mjs";
+import { Console } from "../utils/index.mjs";
 /***************** Processing *****************/
 export async function Response($request, $response, context = {}) {
     // 解构预取数据（从 Hono.js 并发预取传入）
-    const { preFetched = {}, enviroments: preEnviroments, parameters: preParameters, Settings: preSettings, Caches: preCaches, Configs: preConfigs } = context;
+    const { preFetched = {}, enviroments: preEnviroments, parameters: preParameters, Settings: preSettings, Configs: preConfigs } = context;
     // 解构URL
     const url = new URL($request.url);
     Console.debug("url:", url.toJSON());
@@ -36,7 +36,7 @@ export async function Response($request, $response, context = {}) {
      * 设置
      * @type {{Settings: import('../types').Settings}}
      */
-    const { Settings, Caches, Configs } = preSettings ? { Settings: preSettings, Caches: preCaches, Configs: preConfigs } : setENV("iRingo", "WeatherKit", database);
+    const { Settings, Configs } = preSettings ? { Settings: preSettings, Configs: preConfigs } : buildSettings(database);
     Console.logLevel = Settings.LogLevel;
     // 创建空数据
     let body = {};
@@ -140,7 +140,7 @@ export async function Response($request, $response, context = {}) {
                                     parameters.dataSets.map(async dataSet => {
                                         switch (dataSet) {
                                             case "airQuality": {
-                                                body.airQuality = await InjectAirQuality(body.airQuality, Settings, Caches, enviroments, preFetched);
+                                                body.airQuality = await InjectAirQuality(body.airQuality, Settings, enviroments, preFetched);
                                                 break;
                                             }
                                             case "currentWeather": {
@@ -207,10 +207,10 @@ export async function Response($request, $response, context = {}) {
  * @returns {Promise<any>} 注入后的当前天气数据
  */
 async function InjectCurrentWeather(currentWeather, Settings, enviroments, preFetchedData) {
-    Console.info("☑️ InjectCurrentWeather");
+    Console.debug("☑️ InjectCurrentWeather");
     if (!Settings?.Weather?.Replace?.includes(enviroments.country)) {
         Console.warn("InjectCurrentWeather", `Unreplaced country: ${enviroments.country}`);
-        Console.info("✅ InjectCurrentWeather");
+        Console.debug("✅ InjectCurrentWeather");
         return currentWeather;
     }
     let newCurrentWeather;
@@ -236,7 +236,7 @@ async function InjectCurrentWeather(currentWeather, Settings, enviroments, preFe
         newCurrentWeather.metadata = { ...currentWeather?.metadata, ...newCurrentWeather.metadata };
         currentWeather = { ...currentWeather, ...newCurrentWeather };
     }
-    Console.info("✅ InjectCurrentWeather");
+    Console.debug("✅ InjectCurrentWeather");
     return currentWeather;
 }
 
@@ -249,11 +249,11 @@ async function InjectCurrentWeather(currentWeather, Settings, enviroments, preFe
  * @returns {Promise<any>} 注入后的每日预报数据
  */
 async function InjectForecastDaily(forecastDaily, Settings, enviroments, preFetchedData) {
-    Console.info("☑️ InjectForecastDaily");
+    Console.debug("☑️ InjectForecastDaily");
     const replaceDaily = Settings?.Weather?.ReplaceDaily ?? true;
     if (!replaceDaily || !Settings?.Weather?.Replace?.includes(enviroments.country)) {
         Console.warn("InjectForecastDaily", `Unreplaced or skipped country: ${enviroments.country}`);
-        Console.info("✅ InjectForecastDaily");
+        Console.debug("✅ InjectForecastDaily");
         return forecastDaily;
     }
     let newForecastDaily;
@@ -281,7 +281,7 @@ async function InjectForecastDaily(forecastDaily, Settings, enviroments, preFetc
         forecastDaily.metadata = { ...forecastDaily?.metadata, ...newForecastDaily.metadata };
         Weather.mergeForecast(forecastDaily?.days, newForecastDaily?.days);
     }
-    Console.info("✅ InjectForecastDaily");
+    Console.debug("✅ InjectForecastDaily");
     return forecastDaily;
 }
 
@@ -293,11 +293,11 @@ async function InjectForecastDaily(forecastDaily, Settings, enviroments, preFetc
  * @returns {Promise<any>} 注入后的小时预报数据
  */
 async function InjectForecastHourly(forecastHourly, Settings, enviroments, preFetchedData) {
-    Console.info("☑️ InjectForecastHourly");
+    Console.debug("☑️ InjectForecastHourly");
     const replaceHourly = Settings?.Weather?.ReplaceHourly ?? true;
     if (!replaceHourly || !Settings?.Weather?.Replace?.includes(enviroments.country)) {
         Console.warn("InjectForecastHourly", `Unreplaced or skipped country: ${enviroments.country}`);
-        Console.info("✅ InjectForecastHourly");
+        Console.debug("✅ InjectForecastHourly");
         return forecastHourly;
     }
     let newForecastHourly;
@@ -314,7 +314,7 @@ async function InjectForecastHourly(forecastHourly, Settings, enviroments, preFe
                 break;
             }
             case "ColorfulClouds": {
-                Console.info("✅ InjectForecastHourly ColorfulClouds");
+                Console.debug("✅ InjectForecastHourly ColorfulClouds");
                 const hourlysteps = forecastHourly.hours?.length || 273;
                 const begin = forecastHourly.hours?.[0]?.forecastStart || undefined;
                 newForecastHourly = await enviroments.colorfulClouds.ForecastHourly(hourlysteps, begin);
@@ -326,7 +326,7 @@ async function InjectForecastHourly(forecastHourly, Settings, enviroments, preFe
         forecastHourly.metadata = { ...forecastHourly?.metadata, ...newForecastHourly.metadata };
         forecastHourly.hours = Weather.mergeForecast(forecastHourly?.hours, newForecastHourly?.hours);
     }
-    Console.info("✅ InjectForecastHourly");
+    Console.debug("✅ InjectForecastHourly");
     return forecastHourly;
 }
 
@@ -339,10 +339,10 @@ async function InjectForecastHourly(forecastHourly, Settings, enviroments, preFe
  * @returns {Promise<any>} 注入后的下一小时预报数据
  */
 async function InjectForecastNextHour(forecastNextHour, Settings, enviroments, preFetchedData) {
-    Console.info("☑️ InjectForecastNextHour");
+    Console.debug("☑️ InjectForecastNextHour");
 
     // if (forecastNextHour) {
-    //     Console.info("✅ InjectForecastNextHour");
+    //     Console.debug("✅ InjectForecastNextHour");
     //     return forecastNextHour;
     // }
 
@@ -375,7 +375,7 @@ async function InjectForecastNextHour(forecastNextHour, Settings, enviroments, p
             forecastNextHour = { ...forecastNextHour, ...newForecastNextHour };
         }
     }
-    Console.info("✅ InjectForecastNextHour");
+    Console.debug("✅ InjectForecastNextHour");
     return forecastNextHour;
 }
 
@@ -383,12 +383,11 @@ async function InjectForecastNextHour(forecastNextHour, Settings, enviroments, p
  * 注入并合并空气质量数据（污染物、指数、昨日对比）
  * @param {any} airQuality - WeatherKit 原始空气质量对象
  * @param {import('../types').Settings} Settings - 设置对象
- * @param {any} Caches - 缓存对象
  * @param {any} enviroments - 各数据源实例与定位信息
- * @param {Object} [preFetched={}] - 预取的数据（含 pollutants、index 等 Promise）
+ * @param {Object} [preFetched={}] - 预取的数据（含 pollutants、index、locationsGrid 等）
  * @returns {Promise<any>} 合并后的空气质量对象
  */
-async function InjectAirQuality(airQuality, Settings, Caches, enviroments, preFetched = {}) {
+async function InjectAirQuality(airQuality, Settings, enviroments, preFetched = {}) {
     // Step1. 修复污染物单位
     airQuality = AirQuality.FixPollutantsUnits(airQuality);
 
@@ -417,7 +416,7 @@ async function InjectAirQuality(airQuality, Settings, Caches, enviroments, preFe
     const previousDayComparison = needInjectIndex && Settings?.AirQuality?.Comparison?.ReplaceWhenCurrentChange ? AirQuality.Config.CompareCategoryIndexes.UNKNOWN : weatherKitComparison;
     const needInjectComparison = previousDayComparison === AirQuality.Config.CompareCategoryIndexes.UNKNOWN;
     const currentIndexProvider = needInjectIndex ? Settings?.AirQuality?.Current?.Index?.Provider : "WeatherKit";
-    const injectedComparison = needInjectComparison ? await InjectComparison(injectedIndex, currentIndexProvider, Settings, Caches, enviroments) : { ...injectedIndex, previousDayComparison: weatherKitComparison };
+    const injectedComparison = needInjectComparison ? await InjectComparison(injectedIndex, currentIndexProvider, Settings, enviroments, preFetched) : { ...injectedIndex, previousDayComparison: weatherKitComparison };
 
     // Step5. 收集各阶段元数据，拼接最终 providerName 展示文案
     const weatherKitMetadata = airQuality?.metadata;
@@ -461,18 +460,18 @@ async function InjectAirQuality(airQuality, Settings, Caches, enviroments, preFe
 }
 
 async function InjectPollutants(Settings, enviroments) {
-    Console.info("☑️ InjectPollutants");
+    Console.debug("☑️ InjectPollutants");
 
     switch (Settings?.AirQuality?.Current?.Pollutants?.Provider) {
         case "QWeather": {
             const currentAirQuality = await enviroments.qWeather.CurrentAirQuality();
-            Console.info("✅ InjectPollutants");
+            Console.debug("✅ InjectPollutants");
             return currentAirQuality;
         }
         case "ColorfulClouds":
         default: {
             const currentAirQuality = await enviroments.colorfulClouds.CurrentAirQuality();
-            Console.info("✅ InjectPollutants");
+            Console.debug("✅ InjectPollutants");
             return currentAirQuality;
         }
     }
@@ -486,31 +485,31 @@ async function InjectPollutants(Settings, enviroments) {
  * @returns {Promise<any>} 注入后的空气质量数据
  */
 async function InjectIndex(airQuality, Settings, enviroments) {
-    Console.info("☑️ InjectIndex");
+    Console.debug("☑️ InjectIndex");
 
     switch (Settings?.AirQuality?.Current?.Index?.Provider) {
         case "QWeather": {
             const currentAirQuality = await enviroments.qWeather.CurrentAirQuality(Settings.AirQuality.Current.Index.ForceCNPrimaryPollutants);
-            Console.info("✅ InjectIndex");
+            Console.debug("✅ InjectIndex");
             return currentAirQuality;
         }
         case "ColorfulCloudsUS":
         case "ColorfulCloudsCN": {
             const currentAirQuality = await enviroments.colorfulClouds.CurrentAirQuality(Settings.AirQuality.Current.Index.Provider === "ColorfulCloudsUS", Settings.AirQuality.Current.Index.ForceCNPrimaryPollutants);
-            Console.info("✅ InjectIndex");
+            Console.debug("✅ InjectIndex");
             return currentAirQuality;
         }
         case "Calculate":
         default: {
             const currentAirQuality = AirQuality.Pollutants2AQI(airQuality, Settings);
-            Console.info("✅ InjectIndex");
+            Console.debug("✅ InjectIndex");
             return currentAirQuality;
         }
     }
 }
 
-async function InjectComparison(airQuality, currentIndexProvider, Settings, Caches, enviroments) {
-    Console.info("☑️ InjectComparison");
+async function InjectComparison(airQuality, currentIndexProvider, Settings, enviroments, preFetched = {}) {
+    Console.debug("☑️ InjectComparison");
 
     const { UNKNOWN } = AirQuality.Config.CompareCategoryIndexes;
 
@@ -519,27 +518,27 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
      * [环境空气质量指数（AQI）技术规定（试行）_中华人民共和国生态环境部]{@link https://www.mee.gov.cn/ywgz/fgbz/bz/bzwb/jcffbz/201203/t20120302_224166.shtml}
      */
     const isHJ6332012 = (currentIndexProvider, currentScale, Settings) => {
-        Console.info("☑️ isHJ6332012", `currentIndexProvider: ${currentIndexProvider}`);
+        Console.debug("☑️ isHJ6332012", `currentIndexProvider: ${currentIndexProvider}`);
 
         switch (currentIndexProvider) {
             case "Calculate": {
                 Console.debug(`Settings?.AirQuality?.Calculate?.Algorithm: ${Settings?.AirQuality?.Calculate?.Algorithm}`);
                 const result = Settings?.AirQuality?.Calculate?.Algorithm === "WAQI_InstantCast_CN";
-                Console.info("✅ isHJ6332012", result);
+                Console.debug("✅ isHJ6332012", result);
                 return result;
             }
             case "QWeather":
             case "ColorfulCloudsCN": {
-                Console.info("✅ isHJ6332012", true);
+                Console.debug("✅ isHJ6332012", true);
                 return true;
             }
             case "WeatherKit": {
                 const result = AirQuality.GetNameFromScale(currentScale) === AirQuality.Config.Scales.HJ6332012.weatherKitScale.name;
-                Console.info("✅ isHJ6332012", result);
+                Console.debug("✅ isHJ6332012", result);
                 return result;
             }
             default: {
-                Console.info("✅ isHJ6332012", false);
+                Console.debug("✅ isHJ6332012", false);
                 return false;
             }
         }
@@ -549,23 +548,23 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
      * [Technical Assistance Document for the Reporting of Daily Air Quality – the Air Quality Index (AQI)]{@link https://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf}
      */
     const isEPA454_B18007 = currentIndexProvider => {
-        Console.info("☑️ isHJ6332012", `currentIndexProvider: ${currentIndexProvider}`);
+        Console.debug("☑️ isHJ6332012", `currentIndexProvider: ${currentIndexProvider}`);
 
         switch (currentIndexProvider) {
             case "WAQI":
             case "ColorfulCloudsUS": {
-                Console.info("✅ isHJ6332012", true);
+                Console.debug("✅ isHJ6332012", true);
                 return true;
             }
             default: {
-                Console.info("✅ isHJ6332012", false);
+                Console.debug("✅ isHJ6332012", false);
                 return false;
             }
         }
     };
 
     const colorfulCloudsComparison = async (useUsa, currentCategoryIndex) => {
-        Console.info("☑️ colorfulCloudsComparison", `currentCategoryIndex: ${currentCategoryIndex}`);
+        Console.debug("☑️ colorfulCloudsComparison", `currentCategoryIndex: ${currentCategoryIndex}`);
         const yesterdayAirQuality = await enviroments.colorfulClouds.YesterdayAirQuality(useUsa);
 
         const getMetadata = (temporarilyUnavailable = false) => ({
@@ -581,7 +580,7 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
                     metadata: getMetadata(false),
                     previousDayComparison: AirQuality.CompareCategoryIndexes(currentCategoryIndex, yesterdayAirQuality.categoryIndex),
                 };
-                Console.info("✅ colorfulCloudsComparison");
+                Console.debug("✅ colorfulCloudsComparison");
                 return comparisonAirQuality;
             } else {
                 const colorfulCloudsCurrent = await enviroments.colorfulClouds.CurrentAirQuality(useUsa);
@@ -592,7 +591,7 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
                         metadata: getMetadata(false),
                         previousDayComparison: AirQuality.CompareCategoryIndexes(colorfulCloudsCurrent.categoryIndex, yesterdayAirQuality.categoryIndex),
                     };
-                    Console.info("✅ colorfulCloudsComparison");
+                    Console.debug("✅ colorfulCloudsComparison");
                     return comparisonAirQuality;
                 }
             }
@@ -606,13 +605,9 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
         };
     };
     const qweatherComparison = async (currentCategoryIndex, pollutantsToAirQuality) => {
-        Console.info("☑️ qweatherComparison", `currentCategoryIndex: ${currentCategoryIndex}`);
-        const setQWeatherCache = qweatherCache => {
-            Caches.qweather = qweatherCache;
-            Storage.setItem("@iRingo.WeatherKit.Caches", { ...Caches, qweather: qweatherCache });
-        };
-
-        const locationsGrid = await QWeather.GetLocationsGrid(Caches?.qweather, setQWeatherCache);
+        Console.debug("☑️ qweatherComparison", `currentCategoryIndex: ${currentCategoryIndex}`);
+        const locationsGrid = preFetched?.locationsGrid
+            ?? await QWeather.GetLocationsGrid(undefined, () => {});
         const { latitude, longitude } = enviroments.qWeather;
         const locationInfo = QWeather.GetLocationInfo(locationsGrid, latitude, longitude);
 
@@ -648,7 +643,7 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
                     metadata: getMetadata(yesterdayAirQuality.metadata.providerName, false),
                     previousDayComparison: AirQuality.CompareCategoryIndexes(currentCategoryIndex, yesterdayAirQuality.categoryIndex),
                 };
-                Console.info("✅ qweatherComparison");
+                Console.debug("✅ qweatherComparison");
                 return comparisonAirQuality;
             } else {
                 const qweatherCurrent = await enviroments.qWeather.CurrentAirQuality();
@@ -660,7 +655,7 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
                         metadata: getMetadata(yesterdayAirQuality.metadata.providerName, false),
                         previousDayComparison: AirQuality.CompareCategoryIndexes(qweatherCurrent.categoryIndex, yesterdayAirQuality.categoryIndex),
                     };
-                    Console.info("✅ qweatherComparison");
+                    Console.debug("✅ qweatherComparison");
                     return comparisonAirQuality;
                 }
             }
@@ -684,14 +679,14 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
                 switch (PollutantsProvider) {
                     case "ColorfulCloudsCN": {
                         const comparisonAirQuality = await colorfulCloudsComparison(false, isHJ6332012(currentIndexProvider, airQuality?.scale, Settings) ? airQuality?.categoryIndex : undefined);
-                        Console.info("✅ InjectComparison");
+                        Console.debug("✅ InjectComparison");
                         return comparisonAirQuality;
                     }
                     case "QWeather":
                     default: {
                         const pollutantsToAirQuality = airQuality => AirQuality.Pollutants2AQI(airQuality, Settings, { algorithm });
                         const comparisonAirQuality = await qweatherComparison(airQuality?.categoryIndex, pollutantsToAirQuality);
-                        Console.info("✅ InjectComparison");
+                        Console.debug("✅ InjectComparison");
                         return comparisonAirQuality;
                     }
                 }
@@ -702,19 +697,19 @@ async function InjectComparison(airQuality, currentIndexProvider, Settings, Cach
         }
         case "QWeather": {
             const comparisonAirQuality = await qweatherComparison(isHJ6332012(currentIndexProvider, airQuality?.scale, Settings) ? airQuality?.categoryIndex : undefined);
-            Console.info("✅ InjectComparison");
+            Console.debug("✅ InjectComparison");
             return comparisonAirQuality;
         }
         case "ColorfulCloudsCN": {
             // Use injected AQI or ColorfulClouds AQI depends on data source
             const comparisonAirQuality = colorfulCloudsComparison(false, isHJ6332012(currentIndexProvider, airQuality?.scale, Settings) ? airQuality?.categoryIndex : undefined);
-            Console.info("✅ InjectComparison");
+            Console.debug("✅ InjectComparison");
             return comparisonAirQuality;
         }
         case "ColorfulCloudsUS":
         default: {
             const comparisonAirQuality = colorfulCloudsComparison(true, isEPA454_B18007(currentIndexProvider) ? airQuality?.categoryIndex : undefined);
-            Console.info("✅ InjectComparison");
+            Console.debug("✅ InjectComparison");
             return comparisonAirQuality;
         }
     }
